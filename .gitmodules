@@ -1,0 +1,3 @@
+[submodule "valuernn"]
+	path = valuernn
+	url = https://github.com/mobeets/valuernn

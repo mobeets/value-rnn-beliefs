@@ -4,8 +4,8 @@ import json
 import argparse
 import numpy as np
 
-import tasks
-from model import ValueRNN
+from valuernn.tasks import starkweather, babayan
+from valuernn.model import ValueRNN
 import analysis.beliefs
 import session
 
@@ -23,7 +23,7 @@ def get_experiment(name, seed=None):
 		np.random.seed(seed)
 	
 	if 'starkweather' in name:
-		E = tasks.Starkweather(ncues=1,
+		E = starkweather.Starkweather(ncues=1,
 			ntrials_per_cue=1000,
 			ntrials_per_episode=1000,
 			omission_probability=P_OMISSION if 'task2' in name else 0.0,
@@ -32,7 +32,7 @@ def get_experiment(name, seed=None):
 			include_null_input=False,
 			half_reward_times=False)
 	elif name == 'babayan':
-		E = tasks.Babayan(nblocks=(100,100), # was 2*(1000,) but want to match starkweather
+		E = babayan.Babayan(nblocks=(100,100), # was 2*(1000,) but want to match starkweather
 			ntrials_per_block=(5,5),
 			reward_sizes_per_block=(1,10),
 			reward_times_per_block=(5,5),
@@ -70,6 +70,8 @@ def get_modelfiles(experiment_name, indir, hidden_size=None):
 	return modelfiles
 
 def rnn_is_valid(experiment_name, rnn):
+	if rnn is None:
+		return False
 	# confirm we analyze models trained with the same p_omission, iti_min, iti_p, etc.
 	if 'starkweather' in experiment_name:
 		if 'task{}'.format(rnn['task_index']) not in experiment_name:
@@ -104,6 +106,8 @@ def make_rnn_model(hidden_size):
 		bias=True, learn_weights=True)
 
 def get_weightsfile(jsonfile, rnn, model_type):
+	if 'weightsfile' not in rnn:
+		return
 	if 'untrained' in model_type:
 		weightsfile = rnn['initial_weightsfile']
 	else:
@@ -114,8 +118,10 @@ def get_weightsfile(jsonfile, rnn, model_type):
 def load_model(jsonfile, model_type):
 	assert model_type in ['value-rnn-trained', 'value-rnn-untrained']
 	rnn = json.load(open(jsonfile))
-	model = make_rnn_model(rnn)
+	model = make_rnn_model(rnn['hidden_size'])
 	weightsfile = get_weightsfile(jsonfile, rnn, model_type)
+	if weightsfile is None:
+		return None
 	model.load_weights_from_path(weightsfile)
 	rnn['model'] = model
 	rnn['weightsfile'] = weightsfile
