@@ -51,14 +51,14 @@ def get_experiments(name):
 
 def get_modelfiles(experiment_name, indir, hidden_size=None):
 	if 'starkweather' in experiment_name:
-		model_name_templates = ['newloss_*']
+		model_name_templates = ['*starkweather*']
 		ignore_templates = ['*_initial*', '*babayan*']
 		if 'task1' in experiment_name:
 			ignore_templates.append('*task2*')
 		elif 'task2' in experiment_name:
 			ignore_templates.append('*task1*')
 	elif experiment_name == 'babayan':
-		model_name_templates = ['newloss_*babayan*']
+		model_name_templates = ['*babayan*']
 		ignore_templates = ['*_initial*', '*starkweather*']
 	if hidden_size is not None:
 		ignore_templates.append('*h{}*'.format(hidden_size))
@@ -76,10 +76,10 @@ def rnn_is_valid(experiment_name, rnn):
 	if 'starkweather' in experiment_name:
 		if 'task{}'.format(rnn['task_index']) not in experiment_name:
 			return False
-		if 'task2' in experiment_name and rnn['p_omission_task2'] != P_OMISSION:
+		if 'task2' in experiment_name and rnn['p_omission_task_2'] != P_OMISSION:
 			return False
 	elif experiment_name == 'babayan':
-		if rnn['reward_time'] != REWARD_TIME:
+		if rnn.get('reward_time', None) != REWARD_TIME:
 			return False
 	if rnn['ncues'] != 1:
 		return False
@@ -90,8 +90,6 @@ def rnn_is_valid(experiment_name, rnn):
 	if rnn['iti_p'] != ITI_P:
 		return False
 	if rnn['iti_min'] != ITI_MIN:
-		return False
-	if rnn['t_padding'] > 0:
 		return False
 	if rnn['recurrent_cell'] != RECURRENT_CELL:
 		return False
@@ -166,7 +164,6 @@ def save_sessions(sessions, args):
 def main(args):
 	experiments = get_experiments(args.experiment_name)
 	models = get_models(args.experiment_name, args.model_type, args.indir, args.hidden_size)
-	return
 	sessions = []
 	for model in models:
 		sessions.append(session.analyze(model, experiments, args.sigma))
