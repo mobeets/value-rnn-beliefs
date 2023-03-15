@@ -42,6 +42,7 @@ def get_experiment(name, seed=None):
 			ntrials_per_episode=None) # n.b. defaults to len(trials)
 	else:
 		raise Exception("Unrecognized experiment: {}".format(name))
+	E.experiment_name = name
 	return E
 
 def get_experiments(name):
@@ -126,7 +127,7 @@ def load_model(jsonfile, model_type):
 	rnn['jsonfile'] = jsonfile
 	return rnn
 
-def get_models(experiment_name, model_type, indir, hidden_size=None):
+def get_models(experiment_name, model_type, indir=None, hidden_size=None):
 	models = []
 	if model_type in ['value-rnn-trained', 'value-rnn-untrained']:
 		jsonfiles = get_modelfiles(experiment_name, indir)

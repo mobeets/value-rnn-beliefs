@@ -6,5 +6,5 @@ def find_itis(model):
 def add_memory_trajectory_and_duration(model, iti, input):
 	pass
 
-def analyze(model, Trials, pomdp=None):
+def analyze(model, Trials):
     return

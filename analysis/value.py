@@ -1,6 +1,6 @@
 import numpy as np
 
-#%% get value weights
+#%% find value weights using TD-LS
 
 def value_weights_tdls(responses, gamma, lambda0=0, add_bias=True, X=None):
     if X is None:
@@ -17,11 +17,14 @@ def value_weights_tdls(responses, gamma, lambda0=0, add_bias=True, X=None):
     X = B_cur.T @ B_next + lambda0*np.eye(B_cur.shape[1])
     y = B_cur.T @ r
     w = np.linalg.lstsq(X, y, rcond=None)[0]
-    return w
+    return w[:,0]
 
-#%% add value and rpe
+#%% add value and rpe to trials
 
-def make_predictions(rs, Z, w, gamma):
+def make_predictions(rs, Z, w, gamma, add_bias=True):
+    if add_bias:
+        Z = np.hstack([Z, np.ones((Z.shape[0],1))])
+    
     rpes = []
     values = []
     for t in range(1,len(rs)):
@@ -38,8 +41,9 @@ def make_predictions(rs, Z, w, gamma):
 
 def add_value_and_rpe(trials, value_weights, gamma):
     Z = np.vstack([trial.Z for trial in trials])
-    rs = np.hstack([trial.y for trial in trials])
+    rs = np.hstack([trial.y[:,0] for trial in trials])
     rpes, values = make_predictions(rs, Z, value_weights, gamma)
+    
     i = 0
     for trial in trials:
         trial.value = values[i:(i+trial.trial_length)]
@@ -51,8 +55,8 @@ def add_value_and_rpe(trials, value_weights, gamma):
 
 def score_mse(trials, pomdp_trials):
     # score value
-    ys = np.hstack([trial.value for trial in trials])
-    yhats = np.hstack([trial.value for trial in pomdp_trials])
+    ys = np.hstack([trial.value for trial in trials])[:-1] # last is nan
+    yhats = np.hstack([trial.value for trial in pomdp_trials])[:-1]
     value_mse = np.mean((ys - yhats)**2)
 
     # score rpes
@@ -61,9 +65,28 @@ def score_mse(trials, pomdp_trials):
     rpe_mse = np.mean((ys - yhats)**2)
     return {'value_mse': value_mse, 'rpe_mse': rpe_mse}
 
-def analyze(Trials, gamma, pomdp=None):
+def rpe_summary(E, trials):
+    if 'starkweather' in E.experiment_name:
+        rpes_cue = [trial.rpe[(trial.iti - E.iti_min):(trial.iti + trial.isi - 1)] for trial in trials if trial.y.max() > 0]
+        n = max([len(x) for x in rpes_cue])
+        rpes_cue = np.nanmean(np.vstack([np.hstack([rpe, np.nan*np.ones(n-len(rpe))]) for rpe in rpes_cue]), axis=0)
+        rpes_end = [trial.rpe[:(trial.iti - E.iti_min)] for trial in trials if trial.y.max() > 0]
+        n = max([len(x) for x in rpes_end])
+        rpes_end = np.nanmean(np.vstack([np.hstack([rpe, np.nan*np.ones(n-len(rpe))]) for rpe in rpes_end]), axis=0)
+        return {'rpes_cue': rpes_cue, 'rpes_end': rpes_end}
+    elif E.experiment_name == 'babayan':
+        raise Exception("RPE summary not implemented yet for Babayan task")
+
+def analyze(experiments, Trials, gamma, pomdp=None):
     weights = value_weights_tdls(Trials['train'], gamma)
     for _, trials in Trials.items():
         add_value_and_rpe(trials, weights, gamma)
-    mse = score_mse(Trials['test'], pomdp['Trials']['test'])
-    return {'weights': weights, 'mse': mse}
+    results = {'weights': weights}
+    
+    # summarize rpes at odor and reward
+    results['rpe_summary'] = rpe_summary(experiments['test'], Trials['test'])
+
+    # score rpes and value relative to pomdp
+    if pomdp is not None:
+        results['mse'] = score_mse(Trials['test'], pomdp['Trials']['test'])
+    return results

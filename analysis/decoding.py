@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn import preprocessing
 from scipy.special import softmax
+from sklearn.decomposition import PCA
 
 #%%
 
@@ -37,8 +38,6 @@ def decode_X_from_y_eval(X, y, mdl):
     if scaler:
         X = scaler.transform(X)
     
-    # phat = softmax(clf.decision_function(X))
-    
     classes = np.unique(y)
     pte_hat = softmax(clf.decision_function(X), axis=-1)
     if len(pte_hat.shape) == 1:
@@ -64,11 +63,32 @@ def decode_X_from_y_eval_pomdp(X, y):
 
 #%% STATE DECODING
 
-def fit_state_weights(trials):
-	pass
+def fit_state_weights(trials, model_type, pca=None):
+    X = np.vstack([trial.Z for trial in trials])
+    S = np.hstack([trial.S for trial in trials])
+    if pca is not None:
+        X = pca.transform(X)
+    if model_type != 'pomdp':
+        return decode_X_from_y_fit(X, S)
 
-def score_state_LL(trials, state_weights):
-	pass
+def score_state_LL(trials, state_weights, model_type, pca=None):
+    X = np.vstack([trial.Z for trial in trials])
+    S = np.hstack([trial.S for trial in trials])
+    if model_type == 'pomdp':
+        return decode_X_from_y_eval_pomdp(X, S)
+    else:
+        if pca is not None:
+            X = pca.transform(X)
+        return decode_X_from_y_eval(X, S, state_weights)
 
-def analyze(model, Trials, pomdp=None):
-    return
+def analyze(model, Trials, usePCs=True):
+    if usePCs:
+        Z = np.vstack([trial.Z for trial in Trials['train']])
+        pca = PCA(n_components=Z.shape[1])
+        pca.fit(Z)
+    else:
+        pca = None
+    state_weights = fit_state_weights(Trials['train'], model['model_type'], pca=pca)
+    results = score_state_LL(Trials['test'], state_weights, model['model_type'])
+    results['state_weights'] = state_weights
+    return results

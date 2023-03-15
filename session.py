@@ -34,20 +34,20 @@ def analyze(model, experiments, pomdp=None, sigma=0):
 		Trials[name] = get_activity(model, experiment, session['sigma'])
 	session['Trials'] = Trials
 	
-	# fit value weights and get rpes
-	session['value'] = analysis.value.analyze(Trials, gamma=model['gamma'], pomdp=pomdp)
+	session['results'] = {}
 
-	return session
+	# fit value weights and get rpes
+	session['results']['value'] = analysis.value.analyze(experiments, Trials, gamma=model['gamma'], pomdp=pomdp)
 
 	# fit belief weights
 	if model['model_type'] != 'pomdp':
-		session['belief_regression'] = analysis.correlations.analyze(model, Trials, pomdp=pomdp)
+		session['results']['belief_regression'] = analysis.correlations.analyze(model, Trials)
 
 	# fit decoding weights
-	session['state_decoding'] = analysis.decoding.analyze(model, Trials, pomdp=pomdp)
+	session['results']['state_decoding'] = analysis.decoding.analyze(model, Trials)
 
 	# characterize dynamics
 	if model['model_type'] != 'pomdp':
-		session['memories'] = analysis.dynamics.analyze(model, Trials)
+		session['results']['memories'] = analysis.dynamics.analyze(model, Trials)
 
 	return session
