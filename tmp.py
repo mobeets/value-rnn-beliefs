@@ -15,6 +15,20 @@ print(len(models))
 
 #%%
 
+from valuernn.train import make_dataloader, probe_model
+
+E = experiments['train']
+dataloader = make_dataloader(E, batch_size=1)
+trials = probe_model(models[0]['model'], dataloader, inactivation_indices=None)
+# plt.subplot(1,2,1)
+# plt.plot(E.trials[0].Z)
+# plt.subplot(1,2,2)
+# plt.plot(trials[0].Z)
+
+#%%
+
 sessions = []
 for model in models:
     sessions.append(session.analyze(model, experiments, 0.1))
+# %%
+

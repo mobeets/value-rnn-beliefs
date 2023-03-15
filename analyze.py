@@ -152,6 +152,7 @@ def get_models(experiment_name, model_type, indir, hidden_size=None):
 	for model in models:
 		model['experiment_name'] = experiment_name
 		model['model_type'] = model_type
+		model['gamma'] = GAMMA
 	return models
 
 def save_sessions(sessions, args):
@@ -164,9 +165,10 @@ def save_sessions(sessions, args):
 def main(args):
 	experiments = get_experiments(args.experiment_name)
 	models = get_models(args.experiment_name, args.model_type, args.indir, args.hidden_size)
+	pomdp = session.analyze(get_models(args.experiment_name, 'pomdp')[0], experiments)
 	sessions = []
 	for model in models:
-		sessions.append(session.analyze(model, experiments, args.sigma))
+		sessions.append(session.analyze(model, experiments, pomdp, args.sigma))
 	save_sessions(sessions, args)
 
 if __name__ == '__main__':

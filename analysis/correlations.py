@@ -43,3 +43,6 @@ def add_belief_prediction(trials, belief_weights):
 
 def score_belief_rsq(trials):
 	pass
+
+def analyze(model, Trials, pomdp=None):
+    return

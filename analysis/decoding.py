@@ -69,3 +69,6 @@ def fit_state_weights(trials):
 
 def score_state_LL(trials, state_weights):
 	pass
+
+def analyze(model, Trials, pomdp=None):
+    return
