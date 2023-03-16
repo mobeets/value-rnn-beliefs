@@ -1,3 +1,4 @@
+## Figures
 
 - Fig 2, Fig 4, Fig S1: plot observations, model activity, value estimate, and RPE on example trials
 - Fig 3C: plot RPEs as a function of reward time
@@ -11,3 +12,10 @@
 - Fig 8A-B: plot ESN activations vs time following odor input
 - Fig 8C-E: plot odor memory, RPE MSE, and belief-rsq vs gain for ESNs
 - Fig S1B-C: plot heatmaps of temporal tuning
+
+## Installation
+
+```bash
+conda create --name valuernn python=3.9 pytorch matplotlib numpy scipy scikit-learn
+conda activate valuernn
+```

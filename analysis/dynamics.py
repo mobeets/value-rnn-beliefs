@@ -31,6 +31,7 @@ def sample_starting_points(trials, nsamples=NSAMPLES):
     return starting_points
 
 def uniquetol(fps, tol_unique):
+    if len(fps) == 0: return fps
     ufps = [fps[0]]
     for fp in fps[1:]:
         ds = [np.linalg.norm(fp - ufp) for ufp in ufps]
@@ -60,6 +61,7 @@ def find_fixed_points(rnn, trials, maxreps=MAXREPS, tol=TOL, tol_unique=TOL_UNIQ
     with torch.no_grad():
         for _, hs in starting_points.items():
             for h in hs:
+                fp = None
                 h = unsqueeze(torch.Tensor(h))
                 for _ in range(maxreps):
                     hnext = rnn.rnn(null_signal, h)[0]
@@ -68,7 +70,8 @@ def find_fixed_points(rnn, trials, maxreps=MAXREPS, tol=TOL, tol_unique=TOL_UNIQ
                         break
                     else:
                         h = hnext
-                fps.append(fp)
+                if fp is not None:
+                    fps.append(fp)
     return uniquetol(fps, tol_unique)
 
 def add_memory_trajectory_and_duration(rnn, h0, input_type, maxreps=MAXREPS, tol_memory=TOL_MEMORY):
