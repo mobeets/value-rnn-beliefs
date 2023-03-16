@@ -106,7 +106,7 @@ def make_rnn_model(hidden_size):
 
 def get_weightsfile(jsonfile, rnn, model_type):
 	if 'weightsfile' not in rnn:
-		if 'untrained' in model_type:
+		if 'untrained' in model_type: # did not save untrained weights at this point
 			return
 		weightsfile = jsonfile.replace('.json', '.pth')
 	elif 'untrained' in model_type:
@@ -159,11 +159,12 @@ def get_models(experiment_name, model_type, indir=None, hidden_size=None):
 	return models
 
 def save_sessions(sessions, args):
-	name = '{}_{}'.format(args.experiment_name, args.model_type)
-	if args.hidden_size is not None:
-		name += '_h{}'.format(args.hidden_size)
-	outfile = os.path.join(args.outdir, name  + '.json')
-	json.dump(sessions, open(outfile, 'w'))
+	results = [session['results'] for session in sessions]
+	filename = '{}_{}'.format(args.experiment_name, args.model_type)
+	if args.hidden_size:
+		filename += 'h{}'.format(args.hidden_size)
+	outfile = os.path.join(args.outdir, filename + '.json')
+	json.dump(results, open(outfile, 'w'))
 
 def main(args):
 	experiments = get_experiments(args.experiment_name)
@@ -186,7 +187,7 @@ if __name__ == '__main__':
 		default=None,
         help='hidden size(s) to analyze for rnns (None analyzes all rnns)')
 	parser.add_argument('-s', '--sigma', type=float,
-		default=0.1,
+		default=0.01,
         help='std dev of noise added to rnn responses')
 	parser.add_argument('-i', '--indir', type=str,
 		default='data/models',
