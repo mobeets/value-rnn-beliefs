@@ -15,13 +15,13 @@ def sample_starting_points(trials, nsamples=NSAMPLES):
     Z = np.vstack([trial.Z for trial in trials])
     xs = np.hstack([trial.X[:,0] for trial in trials])
     
-	# activity in response to an odor is an ISI
+    # activity in response to an odor is an ISI
     ISIs = Z[np.where(xs == 1)[0]]
     ix2 = np.argsort(np.random.rand(len(ISIs)))[:nsamples]
     starting_points['ISI'] = ISIs[ix2]
 
-	# activity in response to a reward is an ITI
-    # 	(considers multiple nonzero rewards)
+    # activity in response to a reward is an ITI
+    #   (considers multiple nonzero rewards)
     rs = np.vstack([trial.y for trial in trials])[:,0]
     all_rews = np.unique(rs[rs > 0])
     for r in all_rews:
@@ -40,7 +40,7 @@ def uniquetol(fps, tol_unique):
     return ufps
 
 def unsqueeze(x):
-	return torch.unsqueeze(torch.unsqueeze(x, 0), 0)
+    return torch.unsqueeze(torch.unsqueeze(x, 0), 0)
 
 def get_const_input(input_size, key):
     const_signal = torch.Tensor([0]*input_size)
@@ -75,22 +75,22 @@ def find_fixed_points(rnn, trials, maxreps=MAXREPS, tol=TOL, tol_unique=TOL_UNIQ
     return uniquetol(fps, tol_unique)
 
 def add_memory_trajectory_and_duration(rnn, h0, input_type, maxreps=MAXREPS, tol_memory=TOL_MEMORY):
-	null_signal = get_const_input(rnn.input_size, 'null')
-	input_signal = get_const_input(rnn.input_size, input_type)
+    null_signal = get_const_input(rnn.input_size, 'null')
+    input_signal = get_const_input(rnn.input_size, input_type)
     
-	with torch.no_grad():
-		traj = [h0]
-		h0 = torch.Tensor(h0)
-		h = rnn.rnn(input_signal, unsqueeze(h0))[0]
-		traj.append(np.squeeze(h.detach().numpy()))
-		for _ in range(maxreps):
-			h = rnn.rnn(null_signal, h)[0]
-			if torch.norm(h - h0) < tol_memory:
-				break
-			else:
-				traj.append(np.squeeze(h.detach().numpy()))
-	ds = np.vstack([np.linalg.norm(h-traj[0]) for h in traj[1:]])[:,0]
-	return {'distances': ds, 'trajectory': traj, 'duration': len(traj), 'input_type': input_type}
+    with torch.no_grad():
+        traj = [h0]
+        h0 = torch.Tensor(h0)
+        h = rnn.rnn(input_signal, unsqueeze(h0))[0]
+        traj.append(np.squeeze(h.detach().numpy()))
+        for _ in range(maxreps):
+            h = rnn.rnn(null_signal, h)[0]
+            if torch.norm(h - h0) < tol_memory:
+                break
+            else:
+                traj.append(np.squeeze(h.detach().numpy()))
+    ds = np.vstack([np.linalg.norm(h-traj[0]) for h in traj[1:]])[:,0]
+    return {'distances': ds, 'trajectory': traj, 'duration': len(traj), 'input_type': input_type}
 
 def analyze(model, Trials):
     trials = Trials['test'] # we do not use training trials for these analyses
