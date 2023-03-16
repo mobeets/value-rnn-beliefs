@@ -5,7 +5,7 @@ from plotting.base import plt, colors
 esnColor = colors['value-esn']
 rnnColor = colors['value-rnn-trained']
 
-def summary_by_gain_attr(attr_name, experiment_name, Sessions, outdir, hidden_size):
+def summary_by_gain(attr_name, experiment_name, Sessions, outdir, hidden_size):
     if attr_name == 'odor-memory':
         valgetter = lambda item: item['results']['memories']['odor_memories'][0]['duration']
     elif attr_name == 'belief-rsq':
@@ -39,11 +39,6 @@ def summary_by_gain_attr(attr_name, experiment_name, Sessions, outdir, hidden_si
     plt.xlabel('Gain', fontsize=12)
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, '{}_esns_{}.pdf'.format(experiment_name, attr_name)))
-
-def summary_by_gain(experiment_name, Sessions, outdir, hidden_size):
-    # Fig 8C-E: plot odor memory, RPE MSE, and belief-rsq vs gain for ESNs
-    for attr_name in ['odor-memory', 'rpe-mse', 'belief-rsq']:
-        summary_by_gain_attr(attr_name, experiment_name, Sessions, outdir, hidden_size)
 
 def activations(experiment_name, valueesns, outdir, xmax=200):
     # Fig 8A-B: plot ESN activations vs time following odor input
