@@ -160,12 +160,13 @@ def get_models(experiment_name, model_type, indir=None, hidden_size=None, esn_ga
     return models
 
 def save_sessions(sessions, args):
+    [session.pop('Trials') for session in sessions]
     results = {
         'experiment': args.experiment,
 		'model_type': args.model_type,
         'hidden_size': args.hidden_size,
         'sigma': args.sigma,
-		'results': [session['results'] for session in sessions]
+		'sessions': sessions
 		}
     filename = '{}_{}'.format(args.experiment, args.model_type)
     if args.hidden_size:

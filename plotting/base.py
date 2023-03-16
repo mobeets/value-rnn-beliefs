@@ -8,6 +8,7 @@ mpl.rcParams['axes.spines.right'] = False
 mpl.rcParams['axes.spines.top'] = False
 
 colors = {
-    'value-rnn': '#6311CE',
+    'beliefs': 'k',
+    'value-rnn-trained': '#6311CE',
     'value-esn': '#CC3432'
 }

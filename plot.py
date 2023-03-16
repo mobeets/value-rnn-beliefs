@@ -4,8 +4,10 @@ import pickle
 import argparse
 import analyze
 import session
-import plotting
+import plotting.errors, plotting.memories, plotting.esns
 
+DEFAULT_ISI_MAX = 15 # Starkweather only
+DEFAULT_ITI_MIN = 10 # Starkweather only
 DEFAULT_HIDDEN_SIZE = 50
 DEFAULT_SIGMA = 0.01
 
@@ -20,12 +22,12 @@ def load_sessions(experiment_name, sessiondir):
             key = results['model_type']
             if results['hidden_size'] is not None:
                 key = (key, results['hidden_size'])
-            Sessions[key] = results['results']
+            Sessions[key] = results['sessions']
     return Sessions
 
-def summary_plots(experiment_name, Sessions, outdir):
+def summary_plots(experiment_name, Sessions, outdir, hidden_size=DEFAULT_HIDDEN_SIZE, iti_min=DEFAULT_ITI_MIN, isi_max=DEFAULT_ISI_MAX):
     # Figs 3D, 4B-C, 7D-E: plot RPE MSE, belief-rsq, and decoding-LL per model
-    plotting.errors.by_model(experiment_name, Sessions, outdir)
+    plotting.errors.by_model(experiment_name, Sessions, outdir, hidden_size)
 
     if experiment_name == 'babayan':
         return
@@ -33,18 +35,20 @@ def summary_plots(experiment_name, Sessions, outdir):
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
     plotting.errors.by_model_size(experiment_name, Sessions, outdir)
 
-    # Figs 5C, S2A: plot distance from ITI following observations, across models
-    plotting.memories.traj(experiment_name, Sessions, outdir)
+    # Figs 5C, S2A: plot dsitances from ITI following odor/reward, across models
+    plotting.memories.traj(experiment_name, Sessions, outdir, hidden_size, isi_max, 'odor')
+    plotting.memories.traj(experiment_name, Sessions, outdir, hidden_size, iti_min, 'reward')
 
-    # Figs 5D, S2B: plot histogram of odor/reward memories
-    plotting.memories.histogram(experiment_name, Sessions, outdir)
+    # Figs 5D, S2B: plot histogram of odor/reward memories, across models
+    plotting.memories.histogram(experiment_name, Sessions, outdir, hidden_size, isi_max, 'odor')
+    plotting.memories.histogram(experiment_name, Sessions, outdir, hidden_size, iti_min, 'reward')
 
-def esn_plots(experiment_name, Sessions, valueesns, outdir):
+def esn_plots(experiment_name, Sessions, valueesns, outdir, hidden_size=DEFAULT_HIDDEN_SIZE):
     # Fig 8A-B: plot ESN activations vs time following odor input
     plotting.esns.activations(experiment_name, valueesns, outdir)
 
     # Fig 8C-E: plot odor memory, RPE MSE, and belief-rsq vs gain for ESNs
-    plotting.esns.summary_by_gain(experiment_name, Sessions, outdir)
+    plotting.esns.summary_by_gain(experiment_name, Sessions, outdir, hidden_size)
 
 def single_rnn_plots(experiment_name, pomdp, valuernn, outdir):
     # Fig 2, Fig 4, Fig S1: plot observations, model activity, value estimate, and RPE on example trials
@@ -62,6 +66,7 @@ def single_rnn_plots_babayan(experiment_name, pomdp, valuernn, outdir):
 def main(args):
     Sessions = load_sessions(args.experiment, args.sessiondir)
     summary_plots(args.experiment, Sessions, args.outdir)
+    return
 
     experiments = analyze.get_experiments(args.experiment)
     pomdp = session.analyze(analyze.get_models(args.experiment, 'pomdp')[0], experiments)
