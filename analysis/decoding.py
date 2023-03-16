@@ -68,8 +68,7 @@ def fit_state_weights(trials, model_type, pca=None):
     S = np.hstack([trial.S for trial in trials])
     if pca is not None:
         X = pca.transform(X)
-    if model_type != 'pomdp':
-        return decode_X_from_y_fit(X, S)
+    return decode_X_from_y_fit(X, S)
 
 def score_state_LL(trials, state_weights, model_type, pca=None):
     X = np.vstack([trial.Z for trial in trials])
@@ -82,13 +81,16 @@ def score_state_LL(trials, state_weights, model_type, pca=None):
         return decode_X_from_y_eval(X, S, state_weights)
 
 def analyze(model, Trials, usePCs=True):
-    if usePCs:
+    if usePCs and model['model_type'] != 'pomdp':
         Z = np.vstack([trial.Z for trial in Trials['train']])
         pca = PCA(n_components=Z.shape[1])
         pca.fit(Z)
     else:
         pca = None
-    state_weights = fit_state_weights(Trials['train'], model['model_type'], pca=pca)
-    results = score_state_LL(Trials['test'], state_weights, model['model_type'])
+    if model['model_type'] != 'pomdp':
+        state_weights = fit_state_weights(Trials['train'], model['model_type'], pca=pca)
+    else:
+        state_weights = None
+    results = score_state_LL(Trials['test'], state_weights, model['model_type'], pca=pca)
     results['state_weights'] = state_weights
     return results

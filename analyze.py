@@ -10,8 +10,8 @@ import analysis.beliefs
 import session
 
 RECURRENT_CELL = 'GRU'
-TRAIN_SEED = 555
-TEST_SEED = 666
+TRAIN_SEED = 456
+TEST_SEED = 123
 ITI_P = 1/8
 ITI_MIN = 10
 GAMMA = 0.93
@@ -106,8 +106,10 @@ def make_rnn_model(hidden_size):
 
 def get_weightsfile(jsonfile, rnn, model_type):
 	if 'weightsfile' not in rnn:
-		return
-	if 'untrained' in model_type:
+		if 'untrained' in model_type:
+			return
+		weightsfile = jsonfile.replace('.json', '.pth')
+	elif 'untrained' in model_type:
 		weightsfile = rnn['initial_weightsfile']
 	else:
 		weightsfile = rnn['weightsfile']
