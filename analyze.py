@@ -110,16 +110,18 @@ def get_weightsfile(jsonfile, rnn, model_type):
         else:
             weightsfile = rnn['weightsfile_initial']
     elif 'weightsfile' not in rnn:
-        return
+        # return
         weightsfile = jsonfile.replace('.json', '.pth')
     else:
         weightsfile = rnn['weightsfile']
     # access these weights files locally, i.e., in same dir as the json file
     return os.path.join(os.path.split(jsonfile)[0], os.path.split(weightsfile)[1])
 
-def load_model(jsonfile, model_type):
+def load_model(jsonfile, model_type, hidden_size):
     assert model_type in ['value-rnn-trained', 'value-rnn-untrained']
     model = json.load(open(jsonfile))
+    if hidden_size is not None and model['hidden_size'] != hidden_size:
+        return None
     rnn = make_rnn_model(model['hidden_size'])
     weightsfile = get_weightsfile(jsonfile, model, model_type)
     if weightsfile is None:
@@ -135,7 +137,7 @@ def get_models(experiment_name, model_type, indir=None, hidden_size=None, esn_ga
     if model_type in ['value-rnn-trained', 'value-rnn-untrained']:
         jsonfiles = get_modelfiles(experiment_name, indir)
         for jsonfile in jsonfiles:
-            model = load_model(jsonfile, model_type)
+            model = load_model(jsonfile, model_type, hidden_size)
             if rnn_model_is_valid(experiment_name, model):
                 models.append(model)
     elif model_type == 'value-esn':

@@ -2,7 +2,7 @@ import os.path
 import numpy as np
 from plotting.base import plt, colors
 
-beliefColor = colors['beliefs']
+beliefColor = colors['pomdp']
 
 def traj(experiment_name, Sessions, outdir, hidden_size, xline, input_name, xmax=200):
     # Figs 5C, S2A: plot distance from ITI following observations, across models
