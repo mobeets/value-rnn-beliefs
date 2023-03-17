@@ -114,7 +114,7 @@ def get_weightsfile(jsonfile, rnn, model_type):
         weightsfile = jsonfile.replace('.json', '.pth')
     else:
         weightsfile = rnn['weightsfile']
-    # access these weights files locally, i.e., in same dir as the json file
+    # access these weights files assuming they are in the same dir as the json file
     return os.path.join(os.path.split(jsonfile)[0], os.path.split(weightsfile)[1])
 
 def load_model(jsonfile, model_type, hidden_size):
