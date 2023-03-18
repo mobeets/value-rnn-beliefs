@@ -53,40 +53,46 @@ def esn_plots(experiment_name, Sessions, valueesns, outdir, hidden_size=DEFAULT_
     for attr_name in ['odor-memory', 'rpe-mse', 'belief-rsq']:
         plotting.esns.summary_by_gain(attr_name, experiment_name, Sessions, outdir, hidden_size)
 
-def single_rnn_plots_starkweather(experiment_name, pomdp, valuernn, outdir):
+def single_rnn_plots_starkweather(experiment_name, pomdp, valuernn, untrainedrnn, outdir, iti_min=DEFAULT_ITI_MIN):
     # Fig 2, Fig 4, Fig S1: plot observations, model activity, value estimate, and RPE on example trials
-    plotting.misc.example_time_series(experiment_name, valuernn, outdir)
+    plotting.misc.example_time_series(experiment_name, valuernn, outdir, iti_min)
 
     # Fig 3C: plot RPEs as a function of reward time
-    plotting.misc.rpes_starkweather(experiment_name, valuernn, outdir, 'value-rnn-trained')
-    plotting.misc.rpes_starkweather(experiment_name, pomdp, outdir, 'pomdp')
+    plotting.misc.rpes_starkweather(experiment_name, valuernn, outdir, iti_min)
+    plotting.misc.rpes_starkweather(experiment_name, pomdp, outdir, iti_min)
     
     # Fig 5B, Fig 7G, Fig S3A: plot 2D model activity trajectories on example trials
     plotting.misc.example_trajectories(experiment_name, valuernn, outdir)
 
     # Fig S1B-C: plot heatmaps of temporal tuning
-    plotting.misc.heatmaps(experiment_name, valuernn, outdir, 'value-rnn-trained')
+    plotting.misc.heatmaps(experiment_name, valuernn, outdir)
+    plotting.misc.heatmaps(experiment_name, untrainedrnn, outdir)
 
 def single_rnn_plots_babayan(experiment_name, pomdp, valuernn, outdir):
     # Fig 7C: plot RPEs as a function of trial index in block
+    pass
+    
     # Fig 7G, Fig S3A: plot 2D model activity trajectories on example trials
+    plotting.misc.example_trajectories(experiment_name, valuernn, outdir)
+
     # Fig S3B: plot distance from ITI following odor observation
     pass
 
 def main(args):
     Sessions = load_sessions(args.experiment, args.sessiondir)
     summary_plots(args.experiment, Sessions, args.outdir)
-    return
 
     experiments = analyze.get_experiments(args.experiment)
     pomdp = session.analyze(analyze.get_models(args.experiment, 'pomdp')[0], experiments)
     valuernn = analyze.get_models(args.experiment, 'value-rnn-trained', args.indir, DEFAULT_HIDDEN_SIZE)[0]
     valuernn = session.analyze(valuernn, experiments, pomdp, DEFAULT_SIGMA)
+    untrainedrnn = analyze.get_models(args.experiment, 'value-rnn-untrained', args.indir, DEFAULT_HIDDEN_SIZE)[0]
+    untrainedrnn = session.analyze(untrainedrnn, experiments, pomdp, DEFAULT_SIGMA)
 
     if args.experiment == 'babayan':
         single_rnn_plots_babayan(args.experiment, pomdp, valuernn, args.outdir)
     elif 'starkweather' in args.experiment:
-        single_rnn_plots_starkweather(args.experiment, pomdp, valuernn, args.outdir)
+        single_rnn_plots_starkweather(args.experiment, Sessions, pomdp, valuernn, args.outdir)
         if 'task2' in args.experiment:
             valueesns = analyze.get_models(args.experiment, 'value-esn', args.indir, DEFAULT_HIDDEN_SIZE, esn_gains=[0.7, 1.7])
             valueesns = [session.analyze(x, experiments, pomdp, DEFAULT_SIGMA) for x in valueesns]

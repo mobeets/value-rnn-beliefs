@@ -73,7 +73,20 @@ def rpe_summary(E, trials):
         rpes_end = [trial.rpe[:(trial.iti - E.iti_min)] for trial in trials if trial.y.max() > 0]
         n = max([len(x) for x in rpes_end])
         rpes_end = np.nanmean(np.vstack([np.hstack([rpe, np.nan*np.ones(n-len(rpe))]) for rpe in rpes_end]), axis=0)
-        return {'rpes_cue': rpes_cue, 'rpes_end': rpes_end}
+        rpes = [(trial.isi if trial.y.max() > 0 else np.nan, trial.rpe[-1]) for trial in trials]
+        rpes_mu = {}
+        isis = sorted(np.unique([isi for isi,rpe in rpes if ~np.isnan(isi)]))
+        for isi in isis:
+            rpes_mu[isi] = []
+        for isi,rpe in rpes:
+            if np.isnan(isi):
+                continue
+            if isi not in rpes_mu:
+                rpes_mu[isi] = []
+            rpes_mu[isi].append(rpe)
+        for isi in rpes_mu:
+            rpes_mu[isi] = np.mean(rpes_mu[isi])
+        return {'rpes_cue': rpes_cue, 'rpes_end': rpes_end, 'rpes_mu': rpes_mu}
     elif E.experiment_name == 'babayan':
         raise Exception("RPE summary not implemented yet for Babayan task")
 
