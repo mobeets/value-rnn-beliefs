@@ -35,6 +35,8 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size):
             if 'rnn' in key:
                 items = [item for item in items if item['hidden_size'] == hidden_size]
         vs = [valgetter(item) for item in items]
+        if len(vs) == 0:
+            continue
         mu = np.mean(vs)
         se = np.std(vs)/np.sqrt(len(vs))
         color = colors[key]

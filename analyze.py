@@ -125,8 +125,10 @@ def load_model(jsonfile, model_type, hidden_size):
     rnn = make_rnn_model(model['hidden_size'])
     weightsfile = get_weightsfile(jsonfile, model, model_type)
     if weightsfile is None:
-        return None
-    rnn.load_weights_from_path(weightsfile)
+        if 'untrained' not in model_type:
+            return None
+    else:
+        rnn.load_weights_from_path(weightsfile)
     model['model'] = rnn
     model['weightsfile'] = weightsfile
     model['jsonfile'] = jsonfile

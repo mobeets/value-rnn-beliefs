@@ -3,46 +3,29 @@ import numpy as np
 from sklearn.decomposition import PCA
 from plotting.base import plt, colors
 
-def example_time_series(experiment_name, model, outdir, iti_min, showPredictions=False, showValueAndRpes=True, showObservations=False):
+def example_time_series(experiment_name, model, outdir, iti_min, inds=np.arange(46)+97, nUnitsToShow=20, showObservations=True, showBeliefs=True, showPredictions=True, showValueAndRpes=True):
     
     name = model['model_type']
-    trials = model['results']['Trials']['test']
-    Mb = []
-    Mr = []
+    trials = model['Trials']['test']
+    color = colors[name]
+    height = 1.5
+    if showPredictions: height += 0.5
+    if showValueAndRpes: height += 2
+    plt.figure(figsize=(5, height))
 
-    S = Mb['session'].S.copy()
-    O = Mb['session'].xs
-    Zb = Mb['session'].Z.copy()
-    Zr = Mr['session'].Z.copy()
-    X = Zr.copy()
-    X = np.hstack([X, np.ones((X.shape[0],1))])
-    Zbhat = []
-
-    Vhat = X @ Mr['session'].val_weights
-    X2 = Zb.copy()
-    X2 = np.hstack([X2, np.ones((X2.shape[0],1))])
-    V = X2 @ Mb['session'].val_weights
-
-    Yhat = Zbhat; Y = Zb
-    top = Yhat - Y; bot = Y - Y.mean(axis=0)[None,:];
-    rsq = 1 - np.diag(top.T @ top).sum()/np.diag(bot.T @ bot).sum()
-
-    Zr = (Zr - Zr.min(axis=0))/(Zr.max(axis=0) - Zr.min(axis=0))
-
-    plt.figure(figsize=(5, 2 if showPredictions else 1.5))
-    inds = np.arange(46) + 97
-    # inds = np.arange(45) + 180
-
-    pad = 0.7
+    # plot odor and reward observations
     if showObservations:
-        for c in [1,2]:
-            ts = np.where(O[inds] == c)[0]
-            plt.plot((c-1)/2 + np.zeros(len(inds)) + pad, 'k-', linewidth=1)
+        pad = 2
+        X = np.vstack([t.X for t in trials])
+        for c in [0,1]:
+            ts = np.where(X[inds,c] > 0)[0]
+            plt.plot(c/2 + np.zeros(len(inds)) + pad, 'k-', linewidth=1)
             for t in ts:
-                plt.plot([t, t], np.array([c-1, c])/2 + pad, 'k-', linewidth=1)
+                plt.plot([t, t], np.array([c, c+1])/2 + pad, 'k-', linewidth=1)
             pad -= 1.3
-        pad = 1.5
 
+    # plot states
+    S = np.hstack([trial.S for trial in trials])
     S[S >= S.max()-iti_min] = S.max()-iti_min
     rew_times = np.unique([trial.isi for trial in trials if trial.y.max() > 0])
     rew_clrs = plt.cm.cool(np.linspace(0,1,rew_times.max()-rew_times.min()+1))
@@ -50,27 +33,37 @@ def example_time_series(experiment_name, model, outdir, iti_min, showPredictions
     clrs = np.vstack([np.zeros((rew_times.min()-1,4)), rew_clrs, np.zeros((S.max()-rew_times.max()+1,4))])
     clrs[:rew_times.min()-1] = clrs[rew_times.min()]
     clrs[rew_times.max():,-1] = 1.
-
     for c in range(S.max()+1):
         ts = np.where(S[inds] == c)[0]
         for t in ts:
-            plt.plot([t, t], np.array([0-1, 0]) + pad, '-', linewidth=1, color=clrs[c])
-    for d in reversed(range(Zb.shape[1])):
-        plt.plot(Zb[inds,d] - 2.2, color=clrs[d] if d < len(clrs) else clrs[-1], linewidth=1)
-    plt.plot(Zr[inds,:16] - 4.0, linewidth=1)
+            plt.plot([t, t], np.array([0-1, 0]) + 0.7, '-', linewidth=1, color=clrs[c])
 
-    if showPredictions:
-        for d in reversed(range(Zbhat.shape[1])):
-            plt.plot(Zbhat[inds,d] - 5.7, color=clrs[d] if d < len(clrs) else clrs[-1], linewidth=1)
+    # plot beliefs
+    if showBeliefs:
+        Zb = np.vstack([t.B for t in trials])
+        for d in reversed(range(Zb.shape[1])):
+            plt.plot(Zb[inds,d] - 2.2, color=clrs[d] if d < len(clrs) else 'k', linewidth=1)
+    
+    # plot activity
+    if name != 'pomdp':
+        Zr = np.vstack([t.Z for t in trials])
+        Zr = (Zr - Zr.min(axis=0))/(Zr.max(axis=0) - Zr.min(axis=0)) # normalize for plotting
+        plt.plot(Zr[inds,:nUnitsToShow] - 4.0, linewidth=1)
 
+    # plot belief prediction
+    if showPredictions and name != 'pomdp':
+        Bhat = np.vstack([t.Bhat for t in trials])
+        for d in reversed(range(Bhat.shape[1])):
+            plt.plot(Bhat[inds,d] - 5.7, color=clrs[d] if d < len(clrs) else clrs[-1], linewidth=1)
+
+    # plot value and rpes
     if showValueAndRpes:
-        V = np.hstack([t.value for t in Mb['session'].responses])
+        V = np.hstack([t.value for t in trials])
         plt.plot(0*V[inds] - 7, '-', linewidth=1, color=0.8*np.ones(3), markersize=1)
-        plt.plot(V[inds] - 7, 'k-', linewidth=1, markersize=1)
-        ys = np.hstack([t.y[:,0] for t in Mb['session'].responses])
-        rpe = np.hstack([[np.nan], ys[1:] + Mr['gamma'] * V[1:] - V[:-1]])
+        plt.plot(V[inds] - 7, '-', linewidth=1, color=color, markersize=1)
+        rpe = np.hstack([t.rpe for t in trials])
         plt.plot(0*V[inds] - 8.2, '-', linewidth=1, color=0.8*np.ones(3), markersize=1)
-        plt.plot(rpe[inds] - 8.2, 'k-', linewidth=1, markersize=1)
+        plt.plot(rpe[inds] - 8.2, '-', color=color, linewidth=1, markersize=1)
 
     plt.axis('off')
     plt.tight_layout()
