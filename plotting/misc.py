@@ -235,9 +235,22 @@ def example_trajectories(experiment_name, model, outdir):
 def example_block_distances(model, outdir):
     plt.figure(figsize=(2,2))
 
-    raise Exception("Not yet implemented!")
     trials = model['Trials']['test']
-    Trajs = [traj['distances'] for traj in model['results']['memories']['omission_trials']]
+    fps = model['results']['memories']['fixed_points']
+    if len(fps) != 1:
+        print("ERROR: Did not find one fixed point.")
+    trajs = [traj['trajectory'] for traj in model['results']['memories']['pretend_omission_trials']]
+    for trial, traj in zip(trials, trajs):
+        if trial.rel_trial_index == 0:
+            continue
+        dists = np.sum((traj - fps[0])**2,axis=1)
+        color = '#BB271A' if trial.block_index == 1 else '#0000C4'
+
+        plt.plot(dists, '-', alpha=0.7, color=color)
+    plt.xlim([-3, 400])
+    plt.xticks([0, 65, 200])
+    plt.xlabel('Time rel. to odor', fontsize=12)
+    plt.ylabel('Distance to fixed point', fontsize=12)
 
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, 'babayan_example_block-distances.pdf'))
