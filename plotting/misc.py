@@ -75,7 +75,7 @@ def rpes_starkweather(experiment_name, model, outdir, iti_min):
 
     xl = (np.array([-0.9, 3.8])/0.2).tolist()
     val_getter_pre = lambda item: item['results']['value']['rpe_summary']['rpes_cue']
-    val_getter = lambda item: list(item['results']['value']['rpe_summary']['rpes_mu'].items())
+    val_getter = lambda item: np.vstack(list(item['results']['value']['rpe_summary']['rpes_mu'].items()))
     val_getter_post = lambda item: item['results']['value']['rpe_summary']['rpes_end']
     xlbl = 'Time (s)'
     ylbl = 'RPE'
@@ -86,12 +86,13 @@ def rpes_starkweather(experiment_name, model, outdir, iti_min):
     vs_post = val_getter_post(model)
     v_post = vs_post[0]
     
+    vs_pre = np.hstack([vs_pre, vs_post])
     xs_pre = np.arange(len(vs_pre)) - iti_min + 2
     xs = vs[:,0]; vs = vs[:,1]
 
     plt.plot(xs_pre, vs_pre, 'k-', linewidth=1)
 
-    clrs = plt.cm.cool(np.linspace(0,1,xs.max()-xs.min()+1))
+    clrs = plt.cm.cool(np.linspace(0,1,int(xs.max()-xs.min()+1)))
     clrs = clrs[::-1]
 
     for i in range(len(xs)):
@@ -194,7 +195,7 @@ def example_trajectories(experiment_name, model, outdir):
     plt.savefig(os.path.join(outdir, '{}_example_trajs.pdf'.format(experiment_name)))
 
 def heatmaps(experiment_name, model, outdir):
-    responses = model['Trials']['test']
+    trials = model['Trials']['test']
     name = model['model_type']
 
     sortThisData = True
@@ -203,11 +204,11 @@ def heatmaps(experiment_name, model, outdir):
     tPre = 2 # number of time steps shown before odor
     tPost = 10 # number of time steps shown after reward
 
-    trialinds = [i for i,x in enumerate(responses) if x.iti==iti and x.isi==isi and x.y.sum() > 0]
+    trialinds = [i for i,x in enumerate(trials) if x.iti==iti and x.isi==isi and x.y.sum() > 0]
     X_hats = []
     for i in trialinds:
-        z = responses[i].Z
-        znext = responses[i+1].Z
+        z = trials[i].Z
+        znext = trials[i+1].Z
         zcur = np.vstack([z, znext])
         zcur = zcur[(iti-tPre):(iti+isi+tPost),:-1]
         X_hats.append(zcur)
