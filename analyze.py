@@ -67,7 +67,7 @@ def get_modelfiles(experiment_name, indir, hidden_size=None):
         modelfiles = glob.glob(os.path.join(indir, model_name_template + '.json'))
         for ignore_template in ignore_templates:
             modelfiles = list(set(modelfiles) - set(glob.glob(os.path.join(indir, ignore_template + '.json'))))
-    return sorted(modelfiles)
+    return sorted(modelfiles)[::-1]
 
 def rnn_model_is_valid(experiment_name, model):
     if model is None:

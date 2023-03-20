@@ -154,7 +154,7 @@ def example_trajectories(experiment_name, model, outdir):
     trials = model['Trials']['test']
     Z = np.vstack([trial.Z for trial in trials])
 
-    odorResp = 'g'
+    odorResp = 'k'
     rewResp = 'r'
     nullResp = 'k'
     nullRespOmission = 'c'
