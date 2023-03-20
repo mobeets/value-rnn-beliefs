@@ -55,6 +55,7 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size):
         plt.ylim(yl)
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, '{}_byModel_{}.pdf'.format(experiment_name, attr_name)))
+    plt.close()
 
 def by_model_size(attr_name, experiment_name, Sessions, outdir):
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
@@ -85,3 +86,4 @@ def by_model_size(attr_name, experiment_name, Sessions, outdir):
         plt.ylim(yl)
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, '{}_byModelSize_{}.pdf'.format(experiment_name, attr_name)))
+    plt.close()

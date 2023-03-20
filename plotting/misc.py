@@ -68,6 +68,7 @@ def example_time_series(experiment_name, model, outdir, iti_min, inds=np.arange(
     plt.axis('off')
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, '{}_trials_{}.pdf'.format(experiment_name, name)))
+    plt.close()
 
 def rpes_starkweather(experiment_name, model, outdir, iti_min):
     plt.figure(figsize=(1.6, 1.8))
@@ -111,80 +112,78 @@ def rpes_starkweather(experiment_name, model, outdir, iti_min):
         plt.xlim(xl)
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, '{}_rpes_{}.pdf'.format(experiment_name, name)))
+    plt.close()
 
 def example_trajectories(experiment_name, model, outdir):
-    plt.figure(figsize=(2.5,2.5))
-    color = colors[model['model_type']]
-    nullColor = 'r'
+    name = model['model_type']
+    color = colors[name]
+    trials = model['Trials']['test']
+    Z = np.vstack([trial.Z for trial in trials])
+
     odorResp = 'k'
     rewResp = 'k'
     nullResp = 'k'
     nullRespOmission = 'c'
-    showOmissions = True
-    trialIndsToShow = [0] if experiment_name == 'starkweather' else [0,4]
-
-    Z = []
-    Z_postRew = []
-    ctrials = []
-    fpsc = []
-    Trajs = []
-    TrajsOdor = []
-    block_ids = []
-    fp_block_ids = []
+    trialIndsToShow = [0] if 'starkweather' in experiment_name else [0,4]
+    
+    ctrials = trials if 'starkweather' in experiment_name else [trial for trial in trials if trial.rel_trial_index > 0]
+    fpsc = model['results']['memories']['fixed_points']
+    Trajs = [traj['trajectory'] for traj in model['results']['memories']['odor_memories']]
 
     pca = PCA(n_components=Z.shape[1])
     pca.fit(Z)
-    Zpc = pca.transform(Z)
 
     xind = 0; yind = 1
     plt.figure(figsize=(2,2))
-    zpc = pca.transform(Z_postRew)
-    fpc = pca.transform(fpsc)
 
     for t in trialIndsToShow:
         trial = ctrials[t]
-        if trial.Z.shape[1] > model.hidden_size:
-            zs = trial.Z[:,:-1]
-        else:
-            zs = trial.Z
-        zs = pca.transform(zs)
+        zs = pca.transform(trial.Z)
         
-        plt.plot(zs[trial.iti-1:trial.iti+1,xind], zs[trial.iti-1:trial.iti+1,yind], '-', color=odorResp, alpha=1, markersize=3, zorder=1)
-        curColor = nullResp if ctrials[t].y.sum() > 0 else nullRespOmission
+        # plot odor response
+        plt.plot(zs[trial.iti-1:trial.iti+1,xind], zs[trial.iti-1:trial.iti+1,yind],
+                '-', color=odorResp, alpha=1, markersize=3, zorder=1)
+        
         if trial.y.sum() > 0:
-            plt.plot(zs[trial.iti+trial.isi-1:trial.iti+trial.isi+1,xind], zs[trial.iti+trial.isi-1:trial.iti+trial.isi+1,yind], '-', color=rewResp, alpha=1, markersize=2, zorder=1)
+            # plot reward response
+            plt.plot(zs[trial.iti+trial.isi-1:trial.iti+trial.isi+1,xind], zs[trial.iti+trial.isi-1:trial.iti+trial.isi+1,yind],
+                    '-', color=rewResp, alpha=1, markersize=2, zorder=1)
             zorder = -1
         else:
             zorder = -2
-        plt.plot(zs[trial.iti:trial.iti+trial.isi,xind], zs[trial.iti:trial.iti+trial.isi,yind], '.', color=curColor, alpha=1, markersize=2, zorder=zorder)
-        plt.plot(zs[trial.iti:trial.iti+trial.isi,xind], zs[trial.iti:trial.iti+trial.isi,yind], '-', color=curColor, alpha=0.5, markersize=2, zorder=zorder)
 
-    for t in trialIndsToShow:
-        traj = Trajs[t]
+        # plot ISI responses
+        curColor = nullResp if trial.y.sum() > 0 else nullRespOmission
+        plt.plot(zs[trial.iti:trial.iti+trial.isi,xind], zs[trial.iti:trial.iti+trial.isi,yind],
+                '.', color=curColor, alpha=1, markersize=2, zorder=zorder)
+        plt.plot(zs[trial.iti:trial.iti+trial.isi,xind], zs[trial.iti:trial.iti+trial.isi,yind],
+                '-', color=curColor, alpha=0.5, markersize=2, zorder=zorder)
+        
+        # plot ITI response (post-reward)
+        next_trial = ctrials[t+1]
+        zs_next = pca.transform(next_trial.Z)
+        zsc = np.vstack([zs[-1:], zs_next[:trial.iti-1]])
+        plt.plot(zsc[:,xind], zsc[:,yind],
+                '.', color=curColor, alpha=1, markersize=2, zorder=zorder)
+        plt.plot(zsc[:,xind], zsc[:,yind],
+                '-', color=curColor, alpha=0.5, markersize=2, zorder=zorder)
+        
+    # plot omission trials
+    for traj in Trajs:
         zs = pca.transform(traj)
-        curColor = nullResp if ctrials[t].y.sum() > 0 else nullRespOmission
-        plt.plot(zs[:,xind], zs[:,yind], '.', color=curColor, alpha=1, markersize=3, zorder=0)
-        plt.plot(zs[:,xind], zs[:,yind], '-', color=curColor, alpha=0.5, markersize=3, zorder=-1)
+        plt.plot(zs[trial.isi:,xind], zs[trial.isi:,yind],
+                '.', color=nullRespOmission, markersize=3, zorder=-1)
+        plt.plot(zs[trial.isi:,xind], zs[trial.isi:,yind],
+                '-', color=nullRespOmission, alpha=0.5, markersize=3, zorder=-2)
 
-        if not showOmissions:
-            continue
-        try:
-            traj = TrajsOdor[t]
-        except:
-            continue
-        zs = pca.transform(traj)
-        curColor = nullRespOmission
-        plt.plot(zs[ctrials[t].isi-1:,xind], zs[ctrials[t].isi-1:,yind], '.', color=curColor, alpha=1, markersize=3, zorder=-1)
-        plt.plot(zs[ctrials[t].isi-1:,xind], zs[ctrials[t].isi-1:,yind], '-', color=curColor, alpha=0.5, markersize=3, zorder=-2)
-
-    for b in np.unique(block_ids):
-        color = '#6311CE'
-        plt.plot(fpc[fp_block_ids==b,xind], fpc[fp_block_ids==b,yind], '.',
-                markersize=14, alpha=0.1, color=color,
-                markeredgewidth=0.5, markeredgecolor='k')
+    fpc = pca.transform(fpsc)
+    plt.plot(fpc[:,xind], fpc[:,yind], '.',
+            markersize=14, color=colors[name],
+            markeredgewidth=0.5, markeredgecolor='k')
 
     plt.xlabel('$z_{}$'.format(xind+1))
     plt.ylabel('$z_{}$'.format(yind+1))
+    Zpc = pca.transform(Z)
     zmn = Zpc.min(axis=0)-0.4
     zmx = Zpc.max(axis=0)+0.1
     plt.xlim([zmn[xind], zmx[xind]])
@@ -192,7 +191,8 @@ def example_trajectories(experiment_name, model, outdir):
     plt.xticks([]); plt.yticks([])
 
     plt.tight_layout()
-    plt.savefig(os.path.join(outdir, '{}_example_trajs.pdf'.format(experiment_name)))
+    plt.savefig(os.path.join(outdir, '{}_example_trajs_{}.pdf'.format(experiment_name, name)))
+    plt.close()
 
 def heatmaps(experiment_name, model, outdir):
     trials = model['Trials']['test']
@@ -241,3 +241,4 @@ def heatmaps(experiment_name, model, outdir):
     cbar = plt.colorbar()
     cbar.ax.tick_params(labelsize=10)
     plt.savefig(os.path.join(outdir, '{}_example_heatmaps_{}.pdf'.format(experiment_name, name)))
+    plt.close()

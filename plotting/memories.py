@@ -20,6 +20,7 @@ def traj(experiment_name, Sessions, outdir, hidden_size, xline, input_name, xmax
     plt.yticks([0, 0.5, 1])
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, '{}_{}-memory_trajs.pdf'.format(experiment_name, input_name)))
+    plt.close()
 
 def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name, xmax=200):
     # Figs 5D, S2B: plot histogram of odor/reward memories
@@ -46,3 +47,4 @@ def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name,
     plt.yticks(np.arange(0,101,25))
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, '{}_{}-memory_hists.pdf'.format(experiment_name, input_name)))
+    plt.close()
