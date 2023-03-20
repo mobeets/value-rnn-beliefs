@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 from .beliefs_starkweather import initial_belief, transition_distribution, observation_distribution
 
 def pomdp(reward_times, p_omission=0.0, ITIhazard=1/65., nITI_microstates=1, jitter=1):
@@ -64,18 +65,18 @@ def get_states_and_observations(trials, iti_min=0, reward_amounts=None):
     return S, np.array(xs)
 
 def get_beliefs(observations, T, O, prior=0.5, reward_amounts=(1,10), reward_sigma=1,
-                trials_per_block=None, prior_by_prev_block=None):
+                ntrials_per_block=None, prior_by_prev_block=None):
     """
     the strategy here is to update beliefs as if there's one block (B)
         while also keeping track of the probability of being in each block (P)
         then duplicate the beliefs, weighting each by P and (1-P), respectively
     """
-    if trials_per_block is None:
-        raise Exception("You need to pass trials_per_block to reset beliefs to prior")
-    assert len(np.unique(trials_per_block)) == 1
+    if ntrials_per_block is None:
+        raise Exception("You need to pass ntrials_per_block to reset beliefs to prior")
+    assert len(np.unique(ntrials_per_block)) == 1
     if prior_by_prev_block is not None:
         assert len(prior_by_prev_block) == len(reward_amounts)
-    trials_per_block = trials_per_block[0]
+    ntrials_per_block = ntrials_per_block[0]
     
     b = initial_belief(T.shape[0])
     p = prior # we will only keep track of one block
@@ -99,7 +100,7 @@ def get_beliefs(observations, T, O, prior=0.5, reward_amounts=(1,10), reward_sig
             p = p[0]
             rewards_seen += 1
             last_reward_index_seen = reward_amounts.index(r)
-        if rewards_seen == trials_per_block:
+        if rewards_seen == ntrials_per_block:
             rewards_seen = 0
             if prior_by_prev_block is not None:
                 p = prior_by_prev_block[last_reward_index_seen]

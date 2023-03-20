@@ -88,7 +88,36 @@ def rpe_summary(E, trials):
             rpes_mu[isi] = np.mean(rpes_mu[isi])
         return {'rpes_cue': rpes_cue, 'rpes_end': rpes_end, 'rpes_mu': rpes_mu}
     elif E.experiment_name == 'babayan':
-        raise Exception("RPE summary not implemented yet for Babayan task")
+        rpes = {}
+        for c, alignType in enumerate(['CS', 'US']):
+            crpes = {}
+            if alignType == 'CS':
+                getter = lambda trial: trial.rpe[trial.iti-1]
+            else:
+                getter = lambda trial: trial.rpe[trial.iti+trial.isi-1]
+            for group in [1,2,3,4]:
+                if group == 1:
+                    matcher = lambda trial: trial.block_index == 0 and trial.prev_block_index == 0
+                elif group == 2:
+                    matcher = lambda trial: trial.block_index == 0 and trial.prev_block_index == 1
+                elif group == 3:
+                    matcher = lambda trial: trial.block_index == 1 and trial.prev_block_index == 0
+                else:
+                    matcher = lambda trial: trial.block_index == 1 and trial.prev_block_index == 1
+
+                cdata = [(trial.rel_trial_index, getter(trial)) for trial in trials if matcher(trial)]
+                mus = []
+                ses = []
+                ts = range(1,max(E.ntrials_per_block)+1)
+                for t in ts:
+                    ys = [y for x,y in cdata if x==(t-1)]
+                    mu = np.mean(ys)
+                    se = np.std(ys)/np.sqrt(len(ys))
+                    mus.append(mu)
+                    ses.append(se)
+                crpes[group] = {'times': ts, 'mus': mus, 'ses': ses}
+            rpes[alignType] = crpes
+        return rpes
 
 def analyze(experiments, Trials, gamma, pomdp=None):
     weights = value_weights_tdls(Trials['train'], gamma)

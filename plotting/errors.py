@@ -30,6 +30,9 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size):
     for xind, key in enumerate(model_names):
         if (key, hidden_size) in Sessions:
             items = Sessions[(key, hidden_size)]
+        elif key not in Sessions:
+            print("ERROR: Could not find any {} models in processed sessions data.".format(key))
+            continue
         else:
             items = Sessions[key]
             if 'rnn' in key:

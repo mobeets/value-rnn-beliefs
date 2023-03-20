@@ -17,7 +17,7 @@ ITI_P = 1/8
 ITI_MIN = 10
 GAMMA = 0.93
 P_OMISSION = 0.1 # starkweather only
-REWARD_TIME = 5 # babayan only
+REWARD_TIME = 10 # babayan only
 ESN_GAINS = np.arange(0.1, 2.8, 0.2)
 
 def get_experiment(name, seed=None):
@@ -67,7 +67,7 @@ def get_modelfiles(experiment_name, indir, hidden_size=None):
         modelfiles = glob.glob(os.path.join(indir, model_name_template + '.json'))
         for ignore_template in ignore_templates:
             modelfiles = list(set(modelfiles) - set(glob.glob(os.path.join(indir, ignore_template + '.json'))))
-    return modelfiles
+    return sorted(modelfiles)
 
 def rnn_model_is_valid(experiment_name, model):
     if model is None:

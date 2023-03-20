@@ -70,6 +70,41 @@ def example_time_series(experiment_name, model, outdir, iti_min, inds=np.arange(
     plt.savefig(os.path.join(outdir, '{}_trials_{}.pdf'.format(experiment_name, name)))
     plt.close()
 
+def rpes_babayan(models, outdir):
+    for alignType in ['CS', 'US']:
+        plt.figure(figsize=(2,2))
+        for model in models:
+            if model is None:
+                continue
+            name = model['model_type']
+            marker = '-' if 'rnn' in name else '--'
+            alpha = 0.9 if 'rnn' in name else 0.7
+            zorder = 1 if 'rnn' in name else 2
+            rpes = model['results']['value']['rpe_summary']
+            crpes = rpes[alignType]
+            for group in [1,2,3,4]:
+                if group == 1:
+                    color = '#0000C4'
+                elif group == 2:
+                    color = '#5297F8'
+                elif group == 3:
+                    color = '#EF8733'
+                else:
+                    color = '#BB271A'
+                vals = crpes[group]
+                ts = vals['times']
+                mus = vals['mus']
+                ses = vals['ses']
+                h = plt.plot(ts, mus, marker, color=color, markersize=10, alpha=alpha, zorder=zorder)
+                for t,mu,se in zip(ts, mus, ses):
+                    plt.plot(t*np.ones(2), [mu-se, mu+se], '-', color=h[0].get_color(), zorder=zorder)
+        plt.xticks(ts)
+        plt.xlabel('Trial')
+        plt.ylabel('RPE')
+        plt.tight_layout()
+        plt.savefig(os.path.join(outdir, 'babayan_rpes_{}.pdf'.format(name, alignType)))
+        plt.close()
+
 def rpes_starkweather(experiment_name, model, outdir, iti_min):
     plt.figure(figsize=(1.6, 1.8))
     name = model['model_type']
@@ -116,19 +151,20 @@ def rpes_starkweather(experiment_name, model, outdir, iti_min):
 
 def example_trajectories(experiment_name, model, outdir):
     name = model['model_type']
-    color = colors[name]
     trials = model['Trials']['test']
     Z = np.vstack([trial.Z for trial in trials])
 
-    odorResp = 'k'
-    rewResp = 'k'
+    odorResp = 'g'
+    rewResp = 'r'
     nullResp = 'k'
     nullRespOmission = 'c'
-    trialIndsToShow = [0] if 'starkweather' in experiment_name else [0,4]
+    trialIndsToShow = [2] if 'starkweather' in experiment_name else [1,6]
+    if 'starkweather' in experiment_name:
+        trialIndsToShow = [i for i in range(len(trials)-1) if trials[i+1].iti > 20][:1]
+    else:
+        trialIndsToShow = [1,6]
     
-    ctrials = trials if 'starkweather' in experiment_name else [trial for trial in trials if trial.rel_trial_index > 0]
-    fpsc = model['results']['memories']['fixed_points']
-    Trajs = [traj['trajectory'] for traj in model['results']['memories']['odor_memories']]
+    Trajs = [traj['trajectory'] for traj in model['results']['memories']['pretend_omission_trials']]
 
     pca = PCA(n_components=Z.shape[1])
     pca.fit(Z)
@@ -137,7 +173,7 @@ def example_trajectories(experiment_name, model, outdir):
     plt.figure(figsize=(2,2))
 
     for t in trialIndsToShow:
-        trial = ctrials[t]
+        trial = trials[t]
         zs = pca.transform(trial.Z)
         
         # plot odor response
@@ -160,26 +196,28 @@ def example_trajectories(experiment_name, model, outdir):
                 '-', color=curColor, alpha=0.5, markersize=2, zorder=zorder)
         
         # plot ITI response (post-reward)
-        next_trial = ctrials[t+1]
+        next_trial = trials[t+1]
         zs_next = pca.transform(next_trial.Z)
-        zsc = np.vstack([zs[-1:], zs_next[:trial.iti-1]])
+        zsc = np.vstack([zs[-1:], zs_next[:next_trial.iti-1]])
         plt.plot(zsc[:,xind], zsc[:,yind],
                 '.', color=curColor, alpha=1, markersize=2, zorder=zorder)
         plt.plot(zsc[:,xind], zsc[:,yind],
                 '-', color=curColor, alpha=0.5, markersize=2, zorder=zorder)
         
+        # plot putative fixed point
+        plt.plot(zsc[-1,xind], zsc[-1,yind], '.',
+                markersize=14, color=colors[name],
+                markeredgewidth=0.5, markeredgecolor='k')
+        
     # plot omission trials
-    for traj in Trajs:
+    for t in trialIndsToShow:
+        trial = trials[t]
+        traj = Trajs[t]
         zs = pca.transform(traj)
-        plt.plot(zs[trial.isi:,xind], zs[trial.isi:,yind],
+        plt.plot(zs[(trial.isi-1):,xind], zs[(trial.isi-1):,yind],
                 '.', color=nullRespOmission, markersize=3, zorder=-1)
-        plt.plot(zs[trial.isi:,xind], zs[trial.isi:,yind],
+        plt.plot(zs[(trial.isi-1):,xind], zs[(trial.isi-1):,yind],
                 '-', color=nullRespOmission, alpha=0.5, markersize=3, zorder=-2)
-
-    fpc = pca.transform(fpsc)
-    plt.plot(fpc[:,xind], fpc[:,yind], '.',
-            markersize=14, color=colors[name],
-            markeredgewidth=0.5, markeredgecolor='k')
 
     plt.xlabel('$z_{}$'.format(xind+1))
     plt.ylabel('$z_{}$'.format(yind+1))
@@ -192,6 +230,17 @@ def example_trajectories(experiment_name, model, outdir):
 
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, '{}_example_trajs_{}.pdf'.format(experiment_name, name)))
+    plt.close()
+
+def example_block_distances(model, outdir):
+    plt.figure(figsize=(2,2))
+
+    raise Exception("Not yet implemented!")
+    trials = model['Trials']['test']
+    Trajs = [traj['distances'] for traj in model['results']['memories']['omission_trials']]
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(outdir, 'babayan_example_block-distances.pdf'))
     plt.close()
 
 def heatmaps(experiment_name, model, outdir):

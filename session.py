@@ -14,7 +14,12 @@ def get_activity(model, experiment, sigma=0):
     else:
         dataloader = make_dataloader(experiment, batch_size=1)
         trials = probe_model(model['model'], dataloader)
-    trials = trials[1:]
+    if hasattr(trials[0], 'rel_trial_index'):
+        # ignore first block so that we always have a valid prev_block_index
+        trials = trials[max(experiment.ntrials_per_block):]
+    else:
+        # ignore first trial since it starts from a random initial state
+        trials = trials[1:]
 
     # add noise (proportional to std. dev of activity across trials)
     if sigma > 0:

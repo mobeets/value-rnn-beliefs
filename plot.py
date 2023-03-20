@@ -9,6 +9,7 @@ import plotting.errors, plotting.memories, plotting.esns, plotting.misc
 DEFAULT_ISI_MAX = 15 # Starkweather only
 DEFAULT_ITI_MIN = 10 # Starkweather only
 DEFAULT_HIDDEN_SIZE = 50
+# print("WARNING: CHANGED HIDDEN SIZE TEMPORARILY FOR TESTING")
 DEFAULT_SIGMA = 0.01
 
 def load_sessions(experiment_name, sessiondir):
@@ -56,28 +57,35 @@ def esn_plots(experiment_name, Sessions, valueesns, outdir, hidden_size=DEFAULT_
 def single_rnn_plots_starkweather(experiment_name, pomdp, valuernn, untrainedrnn, outdir, iti_min=DEFAULT_ITI_MIN):
     # Fig 2, Fig 4, Fig S1: plot observations, model activity, value estimate, and RPE on example trials
     plotting.misc.example_time_series(experiment_name, pomdp, outdir, iti_min)
-    plotting.misc.example_time_series(experiment_name, valuernn, outdir, iti_min)
+    if valuernn is not None:
+        plotting.misc.example_time_series(experiment_name, valuernn, outdir, iti_min)
 
     # Fig 3C: plot RPEs as a function of reward time
-    plotting.misc.rpes_starkweather(experiment_name, valuernn, outdir, iti_min)
     plotting.misc.rpes_starkweather(experiment_name, pomdp, outdir, iti_min)
+    if valuernn is not None:
+        plotting.misc.rpes_starkweather(experiment_name, valuernn, outdir, iti_min)
     
     # Fig 5B, Fig 7G, Fig S3A: plot 2D model activity trajectories on example trials
-    plotting.misc.example_trajectories(experiment_name, valuernn, outdir)
+    if valuernn is not None:
+        plotting.misc.example_trajectories(experiment_name, valuernn, outdir)
 
     # Fig S1B-C: plot heatmaps of temporal tuning
-    plotting.misc.heatmaps(experiment_name, valuernn, outdir)
-    plotting.misc.heatmaps(experiment_name, untrainedrnn, outdir)
+    if valuernn is not None:
+        plotting.misc.heatmaps(experiment_name, valuernn, outdir)
+    if untrainedrnn is not None:
+        plotting.misc.heatmaps(experiment_name, untrainedrnn, outdir)
 
 def single_rnn_plots_babayan(experiment_name, pomdp, valuernn, outdir):
-    # Fig 7G, Fig S3A: plot 2D model activity trajectories on example trials
-    plotting.misc.example_trajectories(experiment_name, valuernn, outdir)
-    
     # Fig 7C: plot RPEs as a function of trial index in block
-    pass
+    plotting.misc.rpes_babayan([pomdp, valuernn], outdir)
+
+    # Fig 7G, Fig S3A: plot 2D model activity trajectories on example trials
+    if valuernn is not None:
+        plotting.misc.example_trajectories(experiment_name, valuernn, outdir)
 
     # Fig S3B: plot distance from ITI following odor observation
-    pass
+    if valuernn is not None:
+        plotting.misc.example_block_distances(valuernn, outdir)
 
 def main(args):
     Sessions = load_sessions(args.experiment, args.sessiondir)
@@ -85,10 +93,26 @@ def main(args):
 
     experiments = analyze.get_experiments(args.experiment)
     pomdp = session.analyze(analyze.get_models(args.experiment, 'pomdp')[0], experiments)
-    valuernn = analyze.get_models(args.experiment, 'value-rnn-trained', args.indir, DEFAULT_HIDDEN_SIZE)[0]
-    valuernn = session.analyze(valuernn, experiments, pomdp, DEFAULT_SIGMA)
-    untrainedrnn = analyze.get_models(args.experiment, 'value-rnn-untrained', args.indir, DEFAULT_HIDDEN_SIZE)[0]
-    untrainedrnn = session.analyze(untrainedrnn, experiments, pomdp, DEFAULT_SIGMA)
+
+    valuernns = analyze.get_models(args.experiment, 'value-rnn-trained', args.indir, DEFAULT_HIDDEN_SIZE)
+    valuernn = session.analyze(valuernns[0], experiments, pomdp, DEFAULT_SIGMA)
+    # todo: this loads different rnn every time
+    print(valuernn['weightsfile'])
+
+    valuernns = analyze.get_models(args.experiment, 'value-rnn-trained', args.indir, DEFAULT_HIDDEN_SIZE)
+    if len(valuernns) == 0:
+        print("WARNING: Could not find any value-rnn-trained model files (.json).")
+        valuernn = None
+    else:
+        valuernn = session.analyze(valuernns[0], experiments, pomdp, DEFAULT_SIGMA)
+    
+    if 'starkweather' in args.experiment:
+        untrainedrnns = analyze.get_models(args.experiment, 'value-rnn-untrained', args.indir, DEFAULT_HIDDEN_SIZE)
+        if len(untrainedrnns) == 0:
+            print("WARNING: Could not find any value-rnn-untrained model files (.json).")
+            untrainedrnn = None
+        else:
+            untrainedrnn = session.analyze(untrainedrnns[0], experiments, pomdp, DEFAULT_SIGMA)
 
     if args.experiment == 'babayan':
         single_rnn_plots_babayan(args.experiment, pomdp, valuernn, args.outdir)

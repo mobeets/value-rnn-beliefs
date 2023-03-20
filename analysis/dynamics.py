@@ -9,7 +9,7 @@ TOL = 1e-5 # tolerance for converging to fixed point
 TOL_MEMORY = 1e-2 # tolerance for measuring memory duration
 TOL_UNIQUE = 1e-2 # tolerance for considering fixed points identical to one another
 
-def sample_starting_points(trials, nsamples=NSAMPLES):
+def sample_starting_points(trials, nsamples):
     # sample starting points
     starting_points = {}
     Z = np.vstack([trial.Z for trial in trials])
@@ -17,17 +17,20 @@ def sample_starting_points(trials, nsamples=NSAMPLES):
     
     # activity in response to an odor is an ISI
     ISIs = Z[np.where(xs == 1)[0]]
-    ix2 = np.argsort(np.random.rand(len(ISIs)))[:nsamples]
-    starting_points['ISI'] = ISIs[ix2]
+    if nsamples < len(ISIs):
+        ix2 = np.argsort(np.random.rand(len(ISIs)))[:nsamples]
+        ISIs = ISIs[ix2]
+    starting_points['ISI'] = ISIs
 
-    # activity in response to a reward is an ITI
-    #   (considers multiple nonzero rewards)
+    # activity in response to a reward is an ITI (considers each nonzero reward)
     rs = np.vstack([trial.y for trial in trials])[:,0]
     all_rews = np.unique(rs[rs > 0])
     for r in all_rews:
         ITIs = Z[np.where(rs == r)[0]]
-        ix1 = np.argsort(np.random.rand(len(ITIs)))[:nsamples]
-        starting_points['ITI_{}'.format(r)] = ITIs[ix1]
+        if nsamples < len(ITIs):
+            ix1 = np.argsort(np.random.rand(len(ITIs)))[:nsamples]
+            ITIs = ITIs[ix1]
+        starting_points['ITI_{}'.format(r)] = ITIs
     return starting_points
 
 def uniquetol(fps, tol_unique):
@@ -54,8 +57,8 @@ def get_const_input(input_size, key):
         raise Exception("Did not recognize key: {}".format(key))
     return unsqueeze(const_signal)
 
-def find_fixed_points(rnn, trials, maxreps=MAXREPS, tol=TOL, tol_unique=TOL_UNIQUE):
-    starting_points = sample_starting_points(trials)
+def find_fixed_points(rnn, trials, nsamples=NSAMPLES, maxreps=MAXREPS, tol=TOL, tol_unique=TOL_UNIQUE):
+    starting_points = sample_starting_points(trials, nsamples)
     null_signal = get_const_input(rnn.input_size, 'null')
     fps = []
     with torch.no_grad():
@@ -74,7 +77,7 @@ def find_fixed_points(rnn, trials, maxreps=MAXREPS, tol=TOL, tol_unique=TOL_UNIQ
                     fps.append(fp)
     return uniquetol(fps, tol_unique)
 
-def add_memory_trajectory_and_duration(rnn, h0, input_type, maxreps=MAXREPS, tol_memory=TOL_MEMORY):
+def add_memory_trajectory_and_duration(rnn, h0, input_type, maxreps=MAXREPS, tol_memory=TOL_MEMORY, minreps=0):
     null_signal = get_const_input(rnn.input_size, 'null')
     input_signal = get_const_input(rnn.input_size, input_type)
     
@@ -83,9 +86,9 @@ def add_memory_trajectory_and_duration(rnn, h0, input_type, maxreps=MAXREPS, tol
         h0 = torch.Tensor(h0)
         h = rnn.rnn(input_signal, unsqueeze(h0))[0]
         traj.append(np.squeeze(h.detach().numpy()))
-        for _ in range(maxreps):
+        for i in range(maxreps):
             h = rnn.rnn(null_signal, h)[0]
-            if torch.norm(h - h0) < tol_memory:
+            if torch.norm(h - h0) < tol_memory and i >= minreps:
                 break
             else:
                 traj.append(np.squeeze(h.detach().numpy()))
@@ -100,5 +103,13 @@ def analyze(model, Trials):
     rew_memories = []
     for fixed_point in fixed_points:
         odor_memories.append(add_memory_trajectory_and_duration(model['model'], fixed_point, 'odor'))
-        rew_memories.append(add_memory_trajectory_and_duration(model['model'], fixed_point, 'reward'))    
-    return {'fixed_points': fixed_points, 'n_fixed_points': n_fixed_points, 'odor_memories': odor_memories, 'rew_memories': rew_memories}
+        rew_memories.append(add_memory_trajectory_and_duration(model['model'], fixed_point, 'reward'))
+    res = {'fixed_points': fixed_points, 'n_fixed_points': n_fixed_points, 'odor_memories': odor_memories, 'rew_memories': rew_memories}
+    
+    # find trajectories on omission trials
+    starting_points = sample_starting_points(trials[:10], 10)
+    omission_trials = []
+    for starting_point in starting_points['ISI']:
+        omission_trials.append(add_memory_trajectory_and_duration(model['model'], starting_point, 'null', minreps=50))
+    res['pretend_omission_trials'] = omission_trials
+    return res
