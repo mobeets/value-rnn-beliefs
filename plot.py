@@ -8,8 +8,7 @@ import plotting.errors, plotting.memories, plotting.esns, plotting.misc
 
 DEFAULT_ISI_MAX = 15 # Starkweather only
 DEFAULT_ITI_MIN = 10 # Starkweather only
-DEFAULT_HIDDEN_SIZE = 100
-print("WARNING: CHANGED HIDDEN SIZE TEMPORARILY FOR TESTING")
+DEFAULT_HIDDEN_SIZE = 50
 DEFAULT_SIGMA = 0.01
 
 def load_sessions(experiment_name, sessiondir):

@@ -247,10 +247,10 @@ def example_block_distances(model, outdir):
         color = '#BB271A' if trial.block_index == 1 else '#0000C4'
 
         plt.plot(dists, '-', alpha=0.7, color=color)
-    plt.xlim([-3, 400])
+    plt.xlim([-8, 400])
     plt.xticks([0, 65, 200])
     plt.xlabel('Time rel. to odor', fontsize=12)
-    plt.ylabel('Distance to fixed point', fontsize=12)
+    plt.ylabel('Dist. to fixed point', fontsize=12)
 
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, 'babayan_example_block-distances.pdf'))
