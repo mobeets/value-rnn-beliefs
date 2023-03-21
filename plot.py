@@ -70,7 +70,7 @@ def esn_plots(experiment_name, Sessions, valueesns, outdir, hidden_size):
     plotting.esns.activations(valueesns, outdir, figname='Fig8A-B')
 
     # Fig 8C-E: plot odor memory, RPE MSE, and belief-rsq vs gain for ESNs
-    for figname, attr_name in zip(['Fig8C', 'Fig8D', 'Fig8E', 'Fig8F'], ['odor-memory', 'rpe-mse', 'belief-rsq', 'reward-memory']):
+    for figname, attr_name in zip(['Fig8C', 'Fig8D', 'Fig8E'], ['odor-memory', 'rpe-mse', 'belief-rsq']):
         plotting.esns.summary_by_gain(attr_name, Sessions, outdir, hidden_size, figname=figname)
 
 def single_rnn_plots_starkweather(experiment_name, pomdp, valuernn, untrainedrnn, outdir, iti_min=DEFAULT_ITI_MIN):
