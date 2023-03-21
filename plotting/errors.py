@@ -28,15 +28,15 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname)
     model_names, labels, valgetter, ylbl, yl = get_plotting_info(experiment_name, attr_name)
     plt.figure(figsize=(1.8,2.5))
     for xind, key in enumerate(model_names):
-        if (key, hidden_size) in Sessions:
-            items = Sessions[(key, hidden_size)]
-        elif key not in Sessions:
+        if key not in Sessions:
             print("ERROR: Could not find any {} models in processed sessions data.".format(key))
             continue
         else:
             items = Sessions[key]
             if 'rnn' in key:
                 items = [item for item in items if item['hidden_size'] == hidden_size]
+                if len(items) == 0:
+                    print("ERROR: Could not find any {} (H={}) models in processed sessions data.".format(key, hidden_size))
         vs = [valgetter(item) for item in items]
         if len(vs) == 0:
             continue
@@ -67,6 +67,9 @@ def by_model_size(attr_name, experiment_name, Sessions, outdir, figname):
 
     plt.figure(figsize=(2.5,2.5))
     for key in model_names:
+        if key not in Sessions:
+            print("ERROR: Could not find any {} models in processed sessions data.".format(key))
+            continue
         items = Sessions[key]
         color = colors[key]
         if 'rnn' in key:

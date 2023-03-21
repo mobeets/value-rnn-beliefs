@@ -197,7 +197,7 @@ if __name__ == '__main__':
         help='which model type to analyze')
     parser.add_argument('--hidden_size', type=int,
         default=None,
-        help='hidden size(s) to analyze for rnns (None analyzes all rnns)')
+        help='hidden size to analyze for rnns (None analyzes all rnns)')
     parser.add_argument('-s', '--sigma', type=float,
         default=0.01,
         help='std dev of noise added to rnn responses')

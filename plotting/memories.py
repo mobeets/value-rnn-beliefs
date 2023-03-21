@@ -6,14 +6,16 @@ beliefColor = colors['pomdp']
 
 def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xmax=200):
     # Figs 5C, S2A: plot distance from ITI following observations, across models
-    if ('value-rnn-trained', hidden_size) not in Sessions:
+    rnns = [rnn for rnn in Sessions.get('value-rnn-trained', []) if rnn['hidden_size'] == hidden_size]
+    if len(rnns) == 0:
         print("ERROR: Could not find any value-rnn-trained, H={} models in processed sessions data.".format(hidden_size))
         return
     plt.figure(figsize=(2.5,2.5))
-    rnns = Sessions[('value-rnn-trained', hidden_size)]
     keyname = input_name if input_name == 'odor' else 'rew'
     for i, rnn in enumerate(rnns):
-        ds = rnn['results']['memories']['{}_memories'.format(keyname)][0]['distances']
+        ds = rnn['results']['memories'].get('{}_memories'.format(keyname), [])
+        if len(ds) > 0:
+            ds = ds[0]['distances']
         plt.plot(ds/ds.max(), alpha=0.8)
     plt.xlabel('Time steps rel.\nto {} input'.format(input_name), fontsize=12)
     plt.ylabel('Rel. distance from ITI', fontsize=12)
@@ -27,16 +29,16 @@ def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xmax=200):
 
 def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name, figname, xmax=200):
     # Figs 5D, S2B: plot histogram of odor/reward memories
-    if ('value-rnn-trained', hidden_size) not in Sessions:
+    rnns = [rnn for rnn in Sessions.get('value-rnn-trained', []) if rnn['hidden_size'] == hidden_size]
+    if len(rnns) == 0:
         print("ERROR: Could not find any value-rnn-trained, H={} models in processed sessions data.".format(hidden_size))
         return
-    
+
     plt.figure(figsize=(2.5,2.5))
     bins = np.linspace(0, xmax, 20)
-
-    rnns = Sessions[('value-rnn-trained', hidden_size)]
     keyname = input_name if input_name == 'odor' else 'rew'
-    vs = [rnn['results']['memories']['{}_memories'.format(keyname)][0]['duration'] for rnn in rnns]
+    getmems = lambda rnn: rnn['results']['memories'].get('{}_memories'.format(keyname), [])
+    vs = [getmems(rnn)[0] for rnn in rnns if len(getmems(rnn)) > 0]
 
     ys, xs = np.histogram(vs, bins=bins)
     print('{} ({}, {}: {:0.2f} ± {:0.2f})'.format(experiment_name, input_name, np.median(vs), np.mean(vs), np.std(vs)/np.sqrt(len(vs))))

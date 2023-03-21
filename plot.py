@@ -2,14 +2,13 @@ import os.path
 import glob
 import pickle
 import argparse
+import numpy as np
 import analyze
 import session
 import plotting.errors, plotting.memories, plotting.esns, plotting.misc
 
-DEFAULT_ISI_MAX = 15 # Starkweather only
+DEFAULT_ISI_MAX = 14 # Starkweather only
 DEFAULT_ITI_MIN = 10 # Starkweather only
-DEFAULT_HIDDEN_SIZE = 50
-DEFAULT_SIGMA = 0.01
 
 def load_sessions(experiment_name, sessiondir):
     template = '{}_*'.format(experiment_name)
@@ -25,7 +24,7 @@ def load_sessions(experiment_name, sessiondir):
             Sessions[key] = results['sessions']
     return Sessions
 
-def summary_plots(experiment_name, Sessions, outdir, hidden_size=DEFAULT_HIDDEN_SIZE, iti_min=DEFAULT_ITI_MIN, isi_max=DEFAULT_ISI_MAX):
+def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAULT_ITI_MIN, isi_max=DEFAULT_ISI_MAX):
     # Figs 3D, 4B-C, 7D-E: plot RPE MSE, belief-rsq, and decoding-LL per model
     if 'starkweather' in experiment_name:
         attrnames = ['rpe-mse', 'belief-rsq', 'state-LL']
@@ -37,9 +36,19 @@ def summary_plots(experiment_name, Sessions, outdir, hidden_size=DEFAULT_HIDDEN_
     for figname, attr_name in zip(fignames, attrnames):
         plotting.errors.by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname=figname)
 
+    # Summarize number of trained RNNs with each number of fixed points
+    hidden_sizes = np.unique([rnn['hidden_size'] for rnn in Sessions.get('value-rnn-trained', [])])
+    if len(hidden_sizes) > 0:
+        print('Number of fixed points in value-rnn-trained on {}:'.format(experiment_name))
+    for H in hidden_sizes:
+        nfps = [rnn['results']['memories']['n_fixed_points'] for rnn in Sessions['value-rnn-trained'] if rnn['hidden_size'] == H]
+        ns = np.unique(nfps)
+        counts = ['{} with {} FP'.format(len([n for n in nfps if n==cn]), cn) for cn in ns]
+        print('    H={}: {}'.format(H, ', '.join(counts)))
+
     if experiment_name == 'babayan':
         return
-
+    
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
     if experiment_name == 'starkweather-task2':
         for figname, attr_name in zip(['Fig6A', 'Fig6B', 'Fig6C'], ['rpe-mse', 'belief-rsq', 'state-LL']):
@@ -57,13 +66,13 @@ def summary_plots(experiment_name, Sessions, outdir, hidden_size=DEFAULT_HIDDEN_
     figname = 'SuppFig2B_top' if 'task1' in experiment_name else 'SuppFig2B_bottom'
     plotting.memories.histogram(experiment_name, Sessions, outdir, hidden_size, iti_min, 'reward', figname=figname)
 
-def esn_plots(experiment_name, Sessions, valueesns, outdir, hidden_size=DEFAULT_HIDDEN_SIZE):
+def esn_plots(experiment_name, Sessions, valueesns, outdir, hidden_size):
     # Fig 8A-B: plot ESN activations vs time following odor input
     plotting.esns.activations(valueesns, outdir, figname='Fig8A-B')
 
     # Fig 8C-E: plot odor memory, RPE MSE, and belief-rsq vs gain for ESNs
-    for figname, attr_name in zip(['Fig8C', 'Fig8D', 'Fig8E'], ['odor-memory', 'rpe-mse', 'belief-rsq']):
-        plotting.esns.summary_by_gain(attr_name, experiment_name, Sessions, outdir, hidden_size, figname=figname)
+    for figname, attr_name in zip(['Fig8C', 'Fig8D', 'Fig8E', 'Fig8F'], ['odor-memory', 'rpe-mse', 'belief-rsq', 'reward-memory']):
+        plotting.esns.summary_by_gain(attr_name, Sessions, outdir, hidden_size, figname=figname)
 
 def single_rnn_plots_starkweather(experiment_name, pomdp, valuernn, untrainedrnn, outdir, iti_min=DEFAULT_ITI_MIN):
     # Fig 2, Fig 4, Fig S1A: plot observations, model activity, value estimate, and RPE on example trials
@@ -105,7 +114,7 @@ def single_rnn_plots_babayan(experiment_name, pomdp, valuernn, outdir):
     if valuernn is not None:
         plotting.misc.example_block_distances(valuernn, outdir, figname='SuppFig3B')
 
-def load_exemplar_models(experiment_name, indir, Sessions, sigma=DEFAULT_SIGMA, hidden_size=DEFAULT_HIDDEN_SIZE):
+def load_exemplar_models(experiment_name, indir, Sessions, hidden_size, sigma):
     experiments = analyze.get_experiments(experiment_name)
     pomdp = session.analyze(analyze.get_models(experiment_name, 'pomdp')[0], experiments, doDecode=False)
 
@@ -135,21 +144,27 @@ def load_exemplar_models(experiment_name, indir, Sessions, sigma=DEFAULT_SIGMA, 
 
 def main(args):
     Sessions = load_sessions(args.experiment, args.sessiondir)
-    summary_plots(args.experiment, Sessions, args.outdir)
+    summary_plots(args.experiment, Sessions, args.outdir, args.hidden_size)
 
-    pomdp, valuernn, untrainedrnn, valueesns = load_exemplar_models(args.experiment, args.indir, Sessions)
+    pomdp, valuernn, untrainedrnn, valueesns = load_exemplar_models(args.experiment, args.indir, Sessions, args.hidden_size, args.sigma)
     if args.experiment == 'babayan':
         single_rnn_plots_babayan(args.experiment, pomdp, valuernn, args.outdir)
     elif 'starkweather' in args.experiment:
         single_rnn_plots_starkweather(args.experiment, pomdp, valuernn, untrainedrnn, args.outdir)
         if valueesns is not None:
-            esn_plots(args.experiment, Sessions, valueesns, args.outdir)
+            esn_plots(args.experiment, Sessions, valueesns, args.outdir, args.hidden_size)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--experiment', type=str,
         choices=['babayan', 'starkweather-task1', 'starkweather-task2'],
         help='which experiment to analyze')
+    parser.add_argument('--hidden_size', type=int,
+        default=50,
+        help='hidden size to use for summarizing rnn results')
+    parser.add_argument('--sigma', type=float,
+        default=0.01,
+        help='std dev of noise added to rnn responses')
     parser.add_argument('-s', '--sessiondir', type=str,
         default='data/sessions',
         help='where to find session files (.pickle)')

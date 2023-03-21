@@ -37,8 +37,7 @@ def uniquetol(fps, tol_unique):
     if len(fps) == 0: return fps
     ufps = [fps[0]]
     for fp in fps[1:]:
-        ds = [np.linalg.norm(fp - ufp) for ufp in ufps]
-        if np.min(ds) > tol_unique:
+        if np.min([np.linalg.norm(fp - ufp) for ufp in ufps]) > tol_unique:
             ufps.append(fp)
     return ufps
 
@@ -99,6 +98,9 @@ def analyze(model, Trials):
     trials = Trials['test'] # we do not use training trials for these analyses
     fixed_points = find_fixed_points(model['model'], trials)
     n_fixed_points = len(fixed_points)
+    if n_fixed_points != 1:
+        print("WARNING: Found {} fixed points in model {}".format(n_fixed_points, model.get('weightsfile', model['model_type'])))
+
     odor_memories = []
     rew_memories = []
     for fixed_point in fixed_points:
