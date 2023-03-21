@@ -56,6 +56,8 @@ def example_time_series(experiment_name, model, outdir, iti_min, figname,
         Bhat = np.vstack([t.Bhat for t in trials])
         for d in reversed(range(Bhat.shape[1])):
             plt.plot(Bhat[inds,d] - 5.7, color=clrs[d] if d < len(clrs) else clrs[-1], linewidth=1)
+        rsq = model['results']['belief_regression']['rsq']
+        print('Belief r-squared ({}, {}): {:0.2f}'.format(experiment_name, name, rsq))
 
     # plot value and rpes
     if showValueAndRpes:
@@ -169,6 +171,8 @@ def example_trajectories(experiment_name, model, outdir, figname, showPretendOmi
 
     pca = PCA(n_components=Z.shape[1])
     pca.fit(Z)
+    if showPretendOmissions: # we only want to print this once
+        print('Variance explained by first two PCs during {}: {:0.2f}%'.format(experiment_name, 100*pca.explained_variance_ratio_[:2].sum()))
 
     xind = 0; yind = 1
     plt.figure(figsize=(2,2))

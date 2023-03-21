@@ -81,6 +81,8 @@ def rnn_model_is_valid(experiment_name, model):
     elif experiment_name == 'babayan':
         if model.get('reward_time', None) != REWARD_TIME:
             return False
+    if model['hidden_size'] not in [2,5,10,20,50,100]:
+        return False
     if model['ncues'] != 1:
         return False
     if model.get('rnn_mode', 'value') != 'value':

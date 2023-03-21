@@ -2,13 +2,13 @@ import os.path
 import numpy as np
 from plotting.base import plt, colors
 
-def get_plotting_info(experiment_name, attr_name):
+def get_plotting_info(experiment_name, attr_name, byModelSize=False):
     model_names = ['pomdp', 'value-rnn-untrained', 'value-rnn-trained']
     labels = ['Beliefs', 'Untrained RNN', 'Value RNN']
     if attr_name == 'rpe-mse':
         valgetter = lambda item: item['results']['value']['mse']['rpe_mse']
         ylbl = 'RPE MSE'
-        yl = [0, 0.005]
+        yl = [-0.0006, 0.01]
         model_names = model_names[1:]
         labels = labels[1:]
     elif attr_name == 'belief-rsq':
@@ -20,7 +20,7 @@ def get_plotting_info(experiment_name, attr_name):
     elif attr_name == 'state-LL':
         valgetter = lambda item: item['results']['state_decoding']['LL']
         ylbl = 'Log-likelihood'
-        yl = [-0.5, 0.03]
+        yl = [-0.5, 0.03] if not byModelSize else [-2, 0.03]
     return model_names, labels, valgetter, ylbl, yl
 
 def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname):
@@ -36,10 +36,8 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname)
             if 'rnn' in key:
                 items = [item for item in items if item['hidden_size'] == hidden_size]
                 if len(items) == 0:
-                    print("ERROR: Could not find any {} (H={}) models in processed sessions data.".format(key, hidden_size))
+                    print("ERROR: Could not find any {}, H={} models in processed sessions data.".format(key, hidden_size))
         vs = [valgetter(item) for item in items]
-        if len(vs) == 0:
-            continue
         mu = np.mean(vs)
         se = np.std(vs)/np.sqrt(len(vs))
         color = colors[key]
@@ -62,7 +60,7 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname)
 
 def by_model_size(attr_name, experiment_name, Sessions, outdir, figname):
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
-    _, _, valgetter, ylbl, yl = get_plotting_info(experiment_name, attr_name)
+    _, _, valgetter, ylbl, yl = get_plotting_info(experiment_name, attr_name, byModelSize=True)
     model_names = ['value-rnn-trained']
 
     plt.figure(figsize=(2.5,2.5))
@@ -81,12 +79,18 @@ def by_model_size(attr_name, experiment_name, Sessions, outdir, figname):
             continue
         xs = [item['hidden_size'] for item in items]
         xsa = np.unique(xs)
-        mus = np.array([np.mean([v for x,v in zip(xs,vs) if x == xc]) for xc in xsa])
-        sef = lambda xs: np.std(xs)/np.sqrt(len(xs))
-        ses = np.array([sef([v for x,v in zip(xs,vs) if x == xc]) for xc in xsa])
-        plt.plot(xsa, mus, '.-', color=color)
-        plt.gca().fill_between(xsa, mus-ses, mus+ses, linewidth=0, alpha=1, color=color)
+        mus = np.array([np.median([v for x,v in zip(xs,vs) if x == xc]) for xc in xsa])
+        # sef = lambda xs: np.std(xs)/np.sqrt(len(xs))
+        # ses = np.array([sef([v for x,v in zip(xs,vs) if x == xc]) for xc in xsa])
+        # lbs = mus-ses; ubs = mus+ses
+        lbs = np.array([np.percentile([v for x,v in zip(xs,vs) if x == xc], 25) for xc in xsa])
+        ubs = np.array([np.percentile([v for x,v in zip(xs,vs) if x == xc], 75) for xc in xsa])
+        plt.plot(xsa, mus, 'o-', color=color, zorder=0)
+        plt.plot(xs + 0.1*(np.random.rand(len(vs))-0.5), vs, '.',
+            markersize=5, color=color, markeredgewidth=0.5, markeredgecolor='k', alpha=1, zorder=1)
+        plt.gca().fill_between(xsa, lbs, ubs, linewidth=0, alpha=0.2, color=color)
     plt.xlabel('# of units')
+    plt.xscale('log')
     plt.ylabel(ylbl)
     if yl:
         plt.ylim(yl)

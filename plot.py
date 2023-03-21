@@ -21,7 +21,10 @@ def load_sessions(experiment_name, sessiondir):
             key = results['model_type']
             if results['hidden_size'] is not None:
                 key = (key, results['hidden_size'])
-            Sessions[key] = results['sessions']
+            sessions = results['sessions']
+            if 'rnn' in results['model_type']:
+                sessions = [x for x in sessions if x['hidden_size'] in [2,5,10,20,50,100]]
+            Sessions[key] = sessions
     return Sessions
 
 def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAULT_ITI_MIN, isi_max=DEFAULT_ISI_MAX):
@@ -37,14 +40,10 @@ def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAUL
         plotting.errors.by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname=figname)
 
     # Summarize number of trained RNNs with each number of fixed points
-    hidden_sizes = np.unique([rnn['hidden_size'] for rnn in Sessions.get('value-rnn-trained', [])])
-    if len(hidden_sizes) > 0:
-        print('Number of fixed points in value-rnn-trained on {}:'.format(experiment_name))
-    for H in hidden_sizes:
-        nfps = [rnn['results']['memories']['n_fixed_points'] for rnn in Sessions['value-rnn-trained'] if rnn['hidden_size'] == H]
-        ns = np.unique(nfps)
-        counts = ['{} with {} FP'.format(len([n for n in nfps if n==cn]), cn) for cn in ns]
-        print('    H={}: {}'.format(H, ', '.join(counts)))
+    nfps = [rnn['results']['memories']['n_fixed_points'] for rnn in Sessions['value-rnn-trained'] if rnn['hidden_size'] == hidden_size]
+    if len(nfps) > 0:
+        counts = ['{} with {} FP'.format(len([n for n in nfps if n==cn]), cn) for cn in np.unique(nfps)]
+        print('Number of fixed points in value-rnn-trained on {}: H={}: {}'.format(experiment_name, hidden_size, ', '.join(counts)))
 
     if experiment_name == 'babayan':
         return
@@ -114,7 +113,7 @@ def single_rnn_plots_babayan(experiment_name, pomdp, valuernn, outdir):
     if valuernn is not None:
         plotting.misc.example_block_distances(valuernn, outdir, figname='SuppFig3B')
 
-def load_exemplar_models(experiment_name, indir, Sessions, hidden_size, sigma):
+def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
     experiments = analyze.get_experiments(experiment_name)
     pomdp = session.analyze(analyze.get_models(experiment_name, 'pomdp')[0], experiments, doDecode=False)
 
@@ -123,6 +122,14 @@ def load_exemplar_models(experiment_name, indir, Sessions, hidden_size, sigma):
         print("WARNING: Could not find any value-rnn-trained model files (.json).")
         valuernn = None
     else:
+        if experiment_name == 'starkweather-task1':
+            weightsfile = os.path.join(indir, 'newloss_46377713_501_value_starkweather_task1_gru_h50_itimin10_1cues-v0.pth')
+        elif experiment_name == 'starkweather-task2':
+            weightsfile = os.path.join(indir, 'newloss_46377799_501_value_starkweather_task2_gru_h50_itimin10_1cues-v0.pth')
+        else:
+            weightsfile = None
+        if weightsfile:
+            valuernns = [rnn for rnn in valuernns if rnn['weightsfile'] == weightsfile]
         valuernn = session.analyze(valuernns[0], experiments, pomdp, sigma, doDecode=False)
     
     if 'starkweather' in args.experiment:
@@ -136,7 +143,7 @@ def load_exemplar_models(experiment_name, indir, Sessions, hidden_size, sigma):
         untrainedrnn = None
 
     if 'task2' in experiment_name:
-        valueesns = analyze.get_models(experiment_name, 'value-esn', indir, hidden_size, esn_gains=[0.7, 1.7])
+        valueesns = analyze.get_models(experiment_name, 'value-esn', indir, hidden_size, esn_gains=[0.9, 1.9])
         valueesns = [session.analyze(x, experiments, pomdp, sigma, doDecode=False) for x in valueesns]
     else:
         valueesns = None
@@ -146,7 +153,7 @@ def main(args):
     Sessions = load_sessions(args.experiment, args.sessiondir)
     summary_plots(args.experiment, Sessions, args.outdir, args.hidden_size)
 
-    pomdp, valuernn, untrainedrnn, valueesns = load_exemplar_models(args.experiment, args.indir, Sessions, args.hidden_size, args.sigma)
+    pomdp, valuernn, untrainedrnn, valueesns = load_exemplar_models(args.experiment, args.indir, args.hidden_size, args.sigma)
     if args.experiment == 'babayan':
         single_rnn_plots_babayan(args.experiment, pomdp, valuernn, args.outdir)
     elif 'starkweather' in args.experiment:

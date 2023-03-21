@@ -12,11 +12,11 @@ def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xmax=200):
         return
     plt.figure(figsize=(2.5,2.5))
     keyname = input_name if input_name == 'odor' else 'rew'
-    for i, rnn in enumerate(rnns):
-        ds = rnn['results']['memories'].get('{}_memories'.format(keyname), [])
-        if len(ds) > 0:
-            ds = ds[0]['distances']
-        plt.plot(ds/ds.max(), alpha=0.8)
+    for _, rnn in enumerate(rnns):
+        mems = rnn['results']['memories']['{}_memories'.format(keyname)]
+        if len(mems) > 0:
+            ds = mems[np.argmin([mem['duration'] for mem in mems])]['distances'] # pick traj with minimal duration if multiple FPs exist
+            plt.plot(ds/ds.max(), alpha=0.8)
     plt.xlabel('Time steps rel.\nto {} input'.format(input_name), fontsize=12)
     plt.ylabel('Rel. distance from ITI', fontsize=12)
     plt.plot(xline*np.ones(2), [0, 1], '--', color=beliefColor)
@@ -36,17 +36,23 @@ def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name,
 
     plt.figure(figsize=(2.5,2.5))
     bins = np.linspace(0, xmax, 20)
+
     keyname = input_name if input_name == 'odor' else 'rew'
-    getmems = lambda rnn: rnn['results']['memories'].get('{}_memories'.format(keyname), [])
-    vs = [getmems(rnn)[0] for rnn in rnns if len(getmems(rnn)) > 0]
+    vs = []
+    for rnn in rnns:
+        mems = rnn['results']['memories']['{}_memories'.format(keyname)]
+        if len(mems) > 0:
+            mem = mems[np.argmin([mem['duration'] for mem in mems])] # pick traj with minimal duration if multiple FPs exist
+            v = mem['duration']
+            vs.append(v)
+    if len(vs) > 0:
+        ys, xs = np.histogram(vs, bins=bins)
+        print('{} ({} memory, {}: {:0.2f} ± {:0.2f})'.format(experiment_name, input_name, np.median(vs), np.mean(vs), np.std(vs)/np.sqrt(len(vs))))
 
-    ys, xs = np.histogram(vs, bins=bins)
-    print('{} ({}, {}: {:0.2f} ± {:0.2f})'.format(experiment_name, input_name, np.median(vs), np.mean(vs), np.std(vs)/np.sqrt(len(vs))))
-
-    xs = [np.mean([xs[i], xs[i+1]]) for i in range(len(xs)-1)]
-    width = np.diff(xs[:-1]).mean()
-    plt.bar(xs, 100*ys/len(vs), width=width)
-    plt.bar(xmax-width/2, len(vs)-ys.sum(), width=width, alpha=0.5)
+        xs = [np.mean([xs[i], xs[i+1]]) for i in range(len(xs)-1)]
+        width = np.diff(xs[:-1]).mean()
+        plt.bar(xs, 100*ys/len(vs), width=width)
+        plt.bar(xmax-width/2, len(vs)-ys.sum(), width=width, alpha=0.5)
     plt.plot(xline*np.ones(2), [0, 100], '--', color=beliefColor)
     
     plt.xlabel('Memory duration')
