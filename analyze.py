@@ -83,7 +83,7 @@ def rnn_model_is_valid(experiment_name, model):
             return False
     if model['ncues'] != 1:
         return False
-    if model['rnn_mode'] != 'value':
+    if model.get('rnn_mode', 'value') != 'value':
         return False
     if model['gamma'] != GAMMA:
         return False
@@ -110,7 +110,7 @@ def get_weightsfile(jsonfile, rnn, model_type):
         else:
             weightsfile = rnn['weightsfile_initial']
     elif 'weightsfile' not in rnn:
-        # return
+        return
         weightsfile = jsonfile.replace('.json', '.pth')
     else:
         weightsfile = rnn['weightsfile']
@@ -125,6 +125,7 @@ def load_model(jsonfile, model_type, hidden_size):
     rnn = make_rnn_model(model['hidden_size'])
     weightsfile = get_weightsfile(jsonfile, model, model_type)
     if weightsfile is None:
+        return None
         if 'untrained' not in model_type:
             return None
     else:

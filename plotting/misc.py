@@ -3,7 +3,8 @@ import numpy as np
 from sklearn.decomposition import PCA
 from plotting.base import plt, colors
 
-def example_time_series(experiment_name, model, outdir, iti_min, inds=np.arange(46)+97, nUnitsToShow=20, showObservations=True, showBeliefs=True, showPredictions=True, showValueAndRpes=True):
+def example_time_series(experiment_name, model, outdir, iti_min, figname,
+                        inds=np.arange(46)+97, nUnitsToShow=20, showObservations=True, showBeliefs=True, showPredictions=True, showValueAndRpes=True):
     
     name = model['model_type']
     trials = model['Trials']['test']
@@ -67,10 +68,10 @@ def example_time_series(experiment_name, model, outdir, iti_min, inds=np.arange(
 
     plt.axis('off')
     plt.tight_layout()
-    plt.savefig(os.path.join(outdir, '{}_trials_{}.pdf'.format(experiment_name, name)))
+    plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()
 
-def rpes_babayan(models, outdir):
+def rpes_babayan(models, outdir, figname):
     for alignType in ['CS', 'US']:
         plt.figure(figsize=(2,2))
         for model in models:
@@ -102,10 +103,10 @@ def rpes_babayan(models, outdir):
         plt.xlabel('Trial')
         plt.ylabel('RPE')
         plt.tight_layout()
-        plt.savefig(os.path.join(outdir, 'babayan_rpes_{}.pdf'.format(name, alignType)))
+        plt.savefig(os.path.join(outdir, figname + '_{}.pdf'.format(alignType)))
         plt.close()
 
-def rpes_starkweather(experiment_name, model, outdir, iti_min):
+def rpes_starkweather(experiment_name, model, outdir, iti_min, figname):
     plt.figure(figsize=(1.6, 1.8))
     name = model['model_type']
 
@@ -146,10 +147,10 @@ def rpes_starkweather(experiment_name, model, outdir, iti_min):
     if xl:
         plt.xlim(xl)
     plt.tight_layout()
-    plt.savefig(os.path.join(outdir, '{}_rpes_{}.pdf'.format(experiment_name, name)))
+    plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()
 
-def example_trajectories(experiment_name, model, outdir):
+def example_trajectories(experiment_name, model, outdir, figname, showPretendOmissions=True):
     name = model['model_type']
     trials = model['Trials']['test']
     Z = np.vstack([trial.Z for trial in trials])
@@ -210,14 +211,15 @@ def example_trajectories(experiment_name, model, outdir):
                 markeredgewidth=0.5, markeredgecolor='k')
         
     # plot omission trials
-    for t in trialIndsToShow:
-        trial = trials[t]
-        traj = Trajs[t]
-        zs = pca.transform(traj)
-        plt.plot(zs[(trial.isi-1):,xind], zs[(trial.isi-1):,yind],
-                '.', color=nullRespOmission, markersize=3, zorder=-1)
-        plt.plot(zs[(trial.isi-1):,xind], zs[(trial.isi-1):,yind],
-                '-', color=nullRespOmission, alpha=0.5, markersize=3, zorder=-2)
+    if showPretendOmissions:
+        for t in trialIndsToShow:
+            trial = trials[t]
+            traj = Trajs[t]
+            zs = pca.transform(traj)
+            plt.plot(zs[(trial.isi-1):,xind], zs[(trial.isi-1):,yind],
+                    '.', color=nullRespOmission, markersize=3, zorder=-1)
+            plt.plot(zs[(trial.isi-1):,xind], zs[(trial.isi-1):,yind],
+                    '-', color=nullRespOmission, alpha=0.5, markersize=3, zorder=-2)
 
     plt.xlabel('$z_{}$'.format(xind+1))
     plt.ylabel('$z_{}$'.format(yind+1))
@@ -229,10 +231,10 @@ def example_trajectories(experiment_name, model, outdir):
     plt.xticks([]); plt.yticks([])
 
     plt.tight_layout()
-    plt.savefig(os.path.join(outdir, '{}_example_trajs_{}.pdf'.format(experiment_name, name)))
+    plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()
 
-def example_block_distances(model, outdir):
+def example_block_distances(model, outdir, figname):
     plt.figure(figsize=(2,2))
 
     trials = model['Trials']['test']
@@ -253,10 +255,10 @@ def example_block_distances(model, outdir):
     plt.ylabel('Dist. to fixed point', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig(os.path.join(outdir, 'babayan_example_block-distances.pdf'))
+    plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()
 
-def heatmaps(experiment_name, model, outdir):
+def heatmaps(model, outdir, figname):
     trials = model['Trials']['test']
     name = model['model_type']
 
@@ -302,5 +304,5 @@ def heatmaps(experiment_name, model, outdir):
     plt.tight_layout()
     cbar = plt.colorbar()
     cbar.ax.tick_params(labelsize=10)
-    plt.savefig(os.path.join(outdir, '{}_example_heatmaps_{}.pdf'.format(experiment_name, name)))
+    plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()

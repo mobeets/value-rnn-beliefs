@@ -4,8 +4,11 @@ from plotting.base import plt, colors
 
 beliefColor = colors['pomdp']
 
-def traj(experiment_name, Sessions, outdir, hidden_size, xline, input_name, xmax=200):
+def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xmax=200):
     # Figs 5C, S2A: plot distance from ITI following observations, across models
+    if ('value-rnn-trained', hidden_size) not in Sessions:
+        print("ERROR: Could not find any value-rnn-trained, H={} models in processed sessions data.".format(hidden_size))
+        return
     plt.figure(figsize=(2.5,2.5))
     rnns = Sessions[('value-rnn-trained', hidden_size)]
     keyname = input_name if input_name == 'odor' else 'rew'
@@ -19,11 +22,15 @@ def traj(experiment_name, Sessions, outdir, hidden_size, xline, input_name, xmax
     plt.xlim([0,xmax])
     plt.yticks([0, 0.5, 1])
     plt.tight_layout()
-    plt.savefig(os.path.join(outdir, '{}_{}-memory_trajs.pdf'.format(experiment_name, input_name)))
+    plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()
 
-def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name, xmax=200):
+def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name, figname, xmax=200):
     # Figs 5D, S2B: plot histogram of odor/reward memories
+    if ('value-rnn-trained', hidden_size) not in Sessions:
+        print("ERROR: Could not find any value-rnn-trained, H={} models in processed sessions data.".format(hidden_size))
+        return
+    
     plt.figure(figsize=(2.5,2.5))
     bins = np.linspace(0, xmax, 20)
 
@@ -46,5 +53,5 @@ def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name,
     plt.ylim([0, 100])
     plt.yticks(np.arange(0,101,25))
     plt.tight_layout()
-    plt.savefig(os.path.join(outdir, '{}_{}-memory_hists.pdf'.format(experiment_name, input_name)))
+    plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()

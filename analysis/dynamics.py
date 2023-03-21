@@ -6,8 +6,8 @@ import torch
 NSAMPLES = 10 # no. of samples to begin search for fixed point
 MAXREPS = 5000 # no. of steps to try to find each fixed point
 TOL = 1e-5 # tolerance for converging to fixed point
-TOL_MEMORY = 1e-2 # tolerance for measuring memory duration
-TOL_UNIQUE = 1e-2 # tolerance for considering fixed points identical to one another
+TOL_MEMORY = 1e-3 # tolerance for measuring memory duration
+TOL_UNIQUE = 1e-3 # tolerance for considering fixed points identical to one another
 
 def sample_starting_points(trials, nsamples):
     # sample starting points

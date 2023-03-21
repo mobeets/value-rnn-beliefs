@@ -1,0 +1,9 @@
+HIDDEN_SIZE=50
+DATADIR='/Users/mobeets/code/value-rnn/data'
+
+python analyze.py -e starkweather-task1 -m value-rnn-trained -i $DATADIR --hidden_size $HIDDEN_SIZE
+python analyze.py -e starkweather-task1 -m value-rnn-untrained -i $DATADIR --hidden_size $HIDDEN_SIZE
+python analyze.py -e starkweather-task2 -m value-rnn-trained -i $DATADIR --hidden_size $HIDDEN_SIZE
+python analyze.py -e starkweather-task2 -m value-rnn-untrained -i $DATADIR --hidden_size $HIDDEN_SIZE
+# python analyze.py -e babayan -m value-rnn-trained -i $DATADIR --hidden_size $HIDDEN_SIZE
+# python analyze.py -e babayan -m value-rnn-untrained -i $DATADIR --hidden_size $HIDDEN_SIZE

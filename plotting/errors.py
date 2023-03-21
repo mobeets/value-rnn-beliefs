@@ -23,7 +23,7 @@ def get_plotting_info(experiment_name, attr_name):
         yl = [-0.5, 0.03]
     return model_names, labels, valgetter, ylbl, yl
 
-def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size):
+def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname):
     # Figs 3D, 4B-C, 7D-E: plot RPE MSE, belief-rsq, and decoding-LL per model
     model_names, labels, valgetter, ylbl, yl = get_plotting_info(experiment_name, attr_name)
     plt.figure(figsize=(1.8,2.5))
@@ -57,10 +57,10 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size):
     if yl:
         plt.ylim(yl)
     plt.tight_layout()
-    plt.savefig(os.path.join(outdir, '{}_byModel_{}.pdf'.format(experiment_name, attr_name)))
+    plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()
 
-def by_model_size(attr_name, experiment_name, Sessions, outdir):
+def by_model_size(attr_name, experiment_name, Sessions, outdir, figname):
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
     _, _, valgetter, ylbl, yl = get_plotting_info(experiment_name, attr_name)
     model_names = ['value-rnn-trained']
@@ -88,5 +88,5 @@ def by_model_size(attr_name, experiment_name, Sessions, outdir):
     if yl:
         plt.ylim(yl)
     plt.tight_layout()
-    plt.savefig(os.path.join(outdir, '{}_byModelSize_{}.pdf'.format(experiment_name, attr_name)))
+    plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()
