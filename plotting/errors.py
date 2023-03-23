@@ -38,13 +38,15 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname)
                 if len(items) == 0:
                     print("ERROR: Could not find any {}, H={} models in processed sessions data.".format(key, hidden_size))
         vs = [valgetter(item) for item in items]
-        mu = np.mean(vs)
-        se = np.std(vs)/np.sqrt(len(vs))
+        mu = np.median(vs)
+        # se = np.std(vs)/np.sqrt(len(vs))
+        lb = np.percentile(vs, 25)
+        ub = np.percentile(vs, 75)
         color = colors[key]
 
-        plt.plot(xind*np.ones(2), [mu-se, mu+se], '-',
-                    color=color,
-                    alpha=0.25, zorder=-1)
+        if 'rnn' in key:
+            plt.plot(xind*np.ones(2), [lb, ub], '-',
+                color=color, linewidth=6, alpha=0.2, zorder=-1)
         plt.plot(xind, mu, 'o', color=color, alpha=1, zorder=0)
         plt.plot(xind*np.ones(len(vs)) + 0.1*(np.random.rand(len(vs))-0.5), vs, '.',
             markersize=5, color=color, markeredgewidth=0.5, markeredgecolor='k', alpha=1, zorder=1)
@@ -85,10 +87,12 @@ def by_model_size(attr_name, experiment_name, Sessions, outdir, figname):
         # lbs = mus-ses; ubs = mus+ses
         lbs = np.array([np.percentile([v for x,v in zip(xs,vs) if x == xc], 25) for xc in xsa])
         ubs = np.array([np.percentile([v for x,v in zip(xs,vs) if x == xc], 75) for xc in xsa])
-        plt.plot(xsa, mus, 'o-', color=color, zorder=0)
-        plt.plot(xs + 0.1*(np.random.rand(len(vs))-0.5), vs, '.',
+        plt.plot(xsa, mus, 'o', color=color, zorder=0)
+        plt.plot(xs + 0.0*(np.random.rand(len(vs))-0.5), vs, '.',
             markersize=5, color=color, markeredgewidth=0.5, markeredgecolor='k', alpha=1, zorder=1)
-        plt.gca().fill_between(xsa, lbs, ubs, linewidth=0, alpha=0.2, color=color)
+        for (xs,lb,ub) in zip(xsa, lbs, ubs):
+            plt.plot(xs*np.ones(2), [lb,ub], '-', linewidth=6, color=color, alpha=0.2, zorder=-1)
+        # plt.gca().fill_between(xsa, lbs, ubs, linewidth=0, alpha=0.2, color=color)
     plt.xlabel('# of units')
     plt.xscale('log')
     plt.ylabel(ylbl)
