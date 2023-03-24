@@ -1,7 +1,7 @@
 import numpy as np
 import analysis.beliefs_starkweather, analysis.beliefs_babayan
 
-def add_states_and_beliefs(experiment_name, experiment, block_prior=0.5, belief_reward_sigma=0.1):
+def add_states_and_beliefs(experiment_name, experiment, block_prior=0.5, belief_reward_sigma=0.001, prior_by_prev_block=(1,0)):
 
     if 'starkweather' in experiment_name:
         T, O = analysis.beliefs_starkweather.pomdp(cue=0, p_omission=experiment.omission_probability, bin_size=experiment.bin_size, ITIhazard=experiment.iti_p, nITI_microstates=experiment.iti_min+1)
@@ -17,6 +17,7 @@ def add_states_and_beliefs(experiment_name, experiment, block_prior=0.5, belief_
             prior=block_prior,
             reward_amounts=experiment.reward_sizes_per_block,
             reward_sigma=belief_reward_sigma,
+            prior_by_prev_block=prior_by_prev_block,
             ntrials_per_block=experiment.ntrials_per_block)
         S, _ = analysis.beliefs_babayan.get_states_and_observations(experiment.trials,
             reward_amounts=experiment.reward_sizes_per_block,

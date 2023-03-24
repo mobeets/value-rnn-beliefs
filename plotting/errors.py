@@ -23,7 +23,7 @@ def get_plotting_info(experiment_name, attr_name, byModelSize=False):
         if 'starkweather' in experiment_name:
             yl = [-0.5, 0.03] if not byModelSize else [-2, 0.03]
         else:
-            yl = [-1, 0.03]
+            yl = [-0.8, 0.05]
     return model_names, labels, valgetter, ylbl, yl
 
 def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname):
@@ -44,7 +44,7 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname)
         mu = np.median(vs)
         lb = np.percentile(vs, 25)
         ub = np.percentile(vs, 75)
-        print('{} ({}, {:0.2f}: {:0.2f} ± {:0.2f})'.format(experiment_name, attr_name, np.median(vs), np.mean(vs), np.std(vs)/np.sqrt(len(vs))))
+        print('{} {} ({}, {:0.2f}: {:0.2f} ± {:0.2f})'.format(experiment_name, key, attr_name, np.median(vs), np.mean(vs), np.std(vs)/np.sqrt(len(vs))))
         color = colors[key]
 
         if 'rnn' in key:

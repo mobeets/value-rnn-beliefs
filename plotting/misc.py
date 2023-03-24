@@ -242,6 +242,7 @@ def example_block_distances(model, outdir, figname):
     plt.figure(figsize=(2,2))
 
     trials = model['Trials']['test']
+    max_iti = 65
     fps = model['results']['memories']['fixed_points']
     if len(fps) != 1:
         print("ERROR: Did not find one fixed point.")
@@ -254,7 +255,7 @@ def example_block_distances(model, outdir, figname):
 
         plt.plot(dists, '-', alpha=0.7, color=color)
     plt.xlim([-8, 400])
-    plt.xticks([0, 65, 200])
+    plt.xticks([0, max_iti, 200])
     plt.xlabel('Time rel. to odor', fontsize=12)
     plt.ylabel('Dist. to fixed point', fontsize=12)
 

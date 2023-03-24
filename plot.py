@@ -116,6 +116,8 @@ def single_rnn_plots_babayan(experiment_name, pomdp, valuernn, outdir):
 def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
     experiments = analyze.get_experiments(experiment_name)
     pomdp = session.analyze(analyze.get_models(experiment_name, 'pomdp')[0], experiments, doDecode=False)
+    if experiment_name == 'babayan':
+        pomdp = session.analyze(analyze.get_models(experiment_name, 'pomdp')[0], experiments, doDecode=False)
 
     valuernns = analyze.get_models(experiment_name, 'value-rnn-trained', indir, hidden_size)
     if len(valuernns) == 0:
@@ -127,7 +129,7 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
         elif experiment_name == 'starkweather-task2':
             weightsfile = os.path.join(indir, 'newloss_46377799_501_value_starkweather_task2_gru_h50_itimin10_1cues-v0.pth')
         elif experiment_name == 'babayan':
-            weightsfile = os.path.join(indir, 'newloss3_46474206_501_value_babayan_task_gru_h50_itimin10_1cues-v0.pth')
+            # weightsfile = os.path.join(indir, 'newloss3_46474206_501_value_babayan_task_gru_h50_itimin10_1cues-v0.pth')
             weightsfile = None
         if weightsfile:
             valuernns = [rnn for rnn in valuernns if rnn['weightsfile'] == weightsfile]

@@ -63,16 +63,20 @@ def decode_X_from_y_eval_pomdp(X, y):
 
 #%% STATE DECODING
 
+def get_state_data(trials):
+    trial_keeper = lambda trial: True if not hasattr(trial, 'rel_trial_index') else trial.rel_trial_index > 0
+    X = np.vstack([trial.Z for trial in trials if trial_keeper(trial)])
+    S = np.hstack([trial.S for trial in trials if trial_keeper(trial)])
+    return X, S
+
 def fit_state_weights(trials, model_type, pca=None):
-    X = np.vstack([trial.Z for trial in trials])
-    S = np.hstack([trial.S for trial in trials])
+    X, S = get_state_data(trials)
     if pca is not None:
         X = pca.transform(X)
     return decode_X_from_y_fit(X, S)
 
 def score_state_LL(trials, state_weights, model_type, pca=None):
-    X = np.vstack([trial.Z for trial in trials])
-    S = np.hstack([trial.S for trial in trials])
+    X, S = get_state_data(trials)
     if model_type == 'pomdp':
         return decode_X_from_y_eval_pomdp(X, S)
     else:
