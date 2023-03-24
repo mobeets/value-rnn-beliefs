@@ -20,7 +20,10 @@ def get_plotting_info(experiment_name, attr_name, byModelSize=False):
     elif attr_name == 'state-LL':
         valgetter = lambda item: item['results']['state_decoding']['LL']
         ylbl = 'Log-likelihood'
-        yl = [-0.5, 0.03] if not byModelSize else [-2, 0.03]
+        if 'starkweather' in experiment_name:
+            yl = [-0.5, 0.03] if not byModelSize else [-2, 0.03]
+        else:
+            yl = [-1, 0.03]
     return model_names, labels, valgetter, ylbl, yl
 
 def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname):
@@ -39,9 +42,9 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname)
                     print("ERROR: Could not find any {}, H={} models in processed sessions data.".format(key, hidden_size))
         vs = [valgetter(item) for item in items]
         mu = np.median(vs)
-        # se = np.std(vs)/np.sqrt(len(vs))
         lb = np.percentile(vs, 25)
         ub = np.percentile(vs, 75)
+        print('{} ({}, {:0.2f}: {:0.2f} ± {:0.2f})'.format(experiment_name, attr_name, np.median(vs), np.mean(vs), np.std(vs)/np.sqrt(len(vs))))
         color = colors[key]
 
         if 'rnn' in key:

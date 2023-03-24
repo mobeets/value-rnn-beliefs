@@ -27,11 +27,11 @@ def summary_by_gain(attr_name, Sessions, outdir, hidden_size, figname):
     plt.figure(figsize=(2.5,2.5))
     plt.plot(xs, ys, '.', color=esnColor)
 
-    if True: # attr_name in ['rpe-mse', 'belief-rsq']:
+    if attr_name in ['rpe-mse', 'belief-rsq']:
         # show average for trained RNNs'
         ysc = [valgetter(item) for item in Sessions.get('value-rnn-trained', []) if item['hidden_size'] == hidden_size]
         if len(ysc) > 0:
-            mu = np.mean(ysc)
+            mu = np.nanmean(ysc)
             plt.plot(plt.xlim(), mu*np.ones(2), '--', linewidth=1.5, zorder=-1, color=rnnColor)
 
     if attr_name == 'odor-memory':

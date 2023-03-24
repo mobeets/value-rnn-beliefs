@@ -13,5 +13,6 @@ python analyze.py -e starkweather-task2 -m value-rnn-untrained -i $DATADIR
 python analyze.py -e starkweather-task2 -m value-esn -i $DATADIR --hidden_size $HIDDEN_SIZE
 
 # Babayan task
-# python analyze.py -e babayan -m value-rnn-trained -i $DATADIR --hidden_size $HIDDEN_SIZE
-# python analyze.py -e babayan -m value-rnn-untrained -i $DATADIR --hidden_size $HIDDEN_SIZE
+python analyze.py -e babayan -m pomdp -i $DATADIR
+python analyze.py -e babayan -m value-rnn-trained -i $DATADIR
+python analyze.py -e babayan -m value-rnn-untrained -i $DATADIR

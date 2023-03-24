@@ -14,9 +14,10 @@ def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xmax=200):
     keyname = input_name if input_name == 'odor' else 'rew'
     for _, rnn in enumerate(rnns):
         mems = rnn['results']['memories']['{}_memories'.format(keyname)]
-        if len(mems) > 0:
-            ds = mems[np.argmin([mem['duration'] for mem in mems])]['distances'] # pick traj with minimal duration if multiple FPs exist
-            plt.plot(ds/ds.max(), alpha=0.8)
+        if len(mems) != 1:
+            continue
+        ds = mems[0]['distances']
+        plt.plot(ds/ds.max(), alpha=0.8)
     plt.xlabel('Time steps rel.\nto {} input'.format(input_name), fontsize=12)
     plt.ylabel('Rel. distance from ITI', fontsize=12)
     plt.plot(xline*np.ones(2), [0, 1], '--', color=beliefColor)
@@ -41,10 +42,9 @@ def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name,
     vs = []
     for rnn in rnns:
         mems = rnn['results']['memories']['{}_memories'.format(keyname)]
-        if len(mems) > 0:
-            mem = mems[np.argmin([mem['duration'] for mem in mems])] # pick traj with minimal duration if multiple FPs exist
-            v = mem['duration']
-            vs.append(v)
+        if len(mems) != 1:
+            continue
+        vs.append(mems[0]['duration'])
     if len(vs) > 0:
         ys, xs = np.histogram(vs, bins=bins)
         print('{} ({} memory, {}: {:0.2f} ± {:0.2f})'.format(experiment_name, input_name, np.median(vs), np.mean(vs), np.std(vs)/np.sqrt(len(vs))))

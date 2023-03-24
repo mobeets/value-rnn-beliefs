@@ -126,11 +126,12 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
             weightsfile = os.path.join(indir, 'newloss_46377713_501_value_starkweather_task1_gru_h50_itimin10_1cues-v0.pth')
         elif experiment_name == 'starkweather-task2':
             weightsfile = os.path.join(indir, 'newloss_46377799_501_value_starkweather_task2_gru_h50_itimin10_1cues-v0.pth')
-        else:
+        elif experiment_name == 'babayan':
+            weightsfile = os.path.join(indir, 'newloss3_46474206_501_value_babayan_task_gru_h50_itimin10_1cues-v0.pth')
             weightsfile = None
         if weightsfile:
             valuernns = [rnn for rnn in valuernns if rnn['weightsfile'] == weightsfile]
-        valuernn = session.analyze(valuernns[0], experiments, pomdp, sigma, doDecode=False)
+        valuernn = session.analyze(valuernns[-1], experiments, pomdp, sigma, doDecode=False)
     
     if 'starkweather' in args.experiment:
         untrainedrnns = analyze.get_models(experiment_name, 'value-rnn-untrained', indir, hidden_size)
