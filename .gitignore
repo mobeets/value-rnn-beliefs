@@ -1,7 +1,8 @@
 .DS_Store
 *.m~
 logs/*
-data/*
+data/figures/*
+data/sessions/*
 papers/*.pdf
 # data/
 *.pickle
