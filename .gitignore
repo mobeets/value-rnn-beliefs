@@ -1,10 +1,11 @@
 .DS_Store
 *.m~
 logs/*
-data/figures/*
-data/sessions/*
-papers/*.pdf
+# data/figures/*
+# data/sessions/*
+# papers/*.pdf
 # data/
+*.pdf
 *.pickle
 *.pyc
 
