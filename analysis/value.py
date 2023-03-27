@@ -118,6 +118,13 @@ def rpe_summary(E, trials):
                 crpes[group] = {'times': ts, 'mus': mus, 'ses': ses}
             rpes[alignType] = crpes
         return rpes
+    elif E.experiment_name == 'babayan-interpolate':
+        rpes = {}
+        for c,ti in enumerate([1,2]):
+            for r in E.reward_sizes_per_block:
+                crpes = [trial.rpe[-1] for trial in trials if trial.reward_size == r and hasattr(trial, 'rel_trial_index') and trial.rel_trial_index==(ti-1)]
+                rpes[(ti,r)] = np.mean(crpes)
+        return rpes
 
 def analyze(experiments, Trials, gamma, pomdp=None):
     weights = value_weights_tdls(Trials['train'], gamma)

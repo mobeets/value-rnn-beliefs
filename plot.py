@@ -28,6 +28,9 @@ def load_sessions(experiment_name, sessiondir):
     return Sessions
 
 def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAULT_ITI_MIN, isi_max=DEFAULT_ISI_MAX):
+    if experiment_name == 'babayan-interpolate':
+        return
+    
     # Figs 3D, 4B-C, 7D-E: plot RPE MSE, belief-rsq, and decoding-LL per model
     if 'starkweather' in experiment_name:
         attrnames = ['rpe-mse', 'belief-rsq', 'state-LL']
@@ -45,7 +48,7 @@ def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAUL
         counts = ['{} with {} FP'.format(len([n for n in nfps if n==cn]), cn) for cn in np.unique(nfps)]
         print('Number of fixed points in value-rnn-trained on {}: H={}: {}'.format(experiment_name, hidden_size, ', '.join(counts)))
 
-    if experiment_name == 'babayan':
+    if 'babayan' in experiment_name:
         return
     
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
@@ -116,7 +119,7 @@ def single_rnn_plots_babayan(experiment_name, pomdp, valuernn, outdir):
 def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
     experiments = analyze.get_experiments(experiment_name)
     pomdp = session.analyze(analyze.get_models(experiment_name, 'pomdp')[0], experiments, doDecode=False)
-    if experiment_name == 'babayan':
+    if 'babayan' in experiment_name:
         pomdp = session.analyze(analyze.get_models(experiment_name, 'pomdp')[0], experiments, doDecode=False)
 
     valuernns = analyze.get_models(experiment_name, 'value-rnn-trained', indir, hidden_size)
@@ -128,7 +131,7 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
             weightsfile = os.path.join(indir, 'newloss_46377713_501_value_starkweather_task1_gru_h50_itimin10_1cues-v0.pth')
         elif experiment_name == 'starkweather-task2':
             weightsfile = os.path.join(indir, 'newloss_46377799_501_value_starkweather_task2_gru_h50_itimin10_1cues-v0.pth')
-        elif experiment_name == 'babayan':
+        elif 'babayan' in experiment_name:
             # weightsfile = os.path.join(indir, 'newloss3_46474206_501_value_babayan_task_gru_h50_itimin10_1cues-v0.pth')
             weightsfile = None
         if weightsfile:
@@ -152,9 +155,7 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
         valueesns = None
     return pomdp, valuernn, untrainedrnn, valueesns
 
-def main(args):
-    Sessions = load_sessions(args.experiment, args.sessiondir)
-
+def plot_loss(Sessions, outdir):
     from plotting.base import plt
     hs = [2,5,10,20,50,100]
     for key, items in Sessions.items():
@@ -178,7 +179,7 @@ def main(args):
                 Ls[h].append(min(rnn['scores']))
                 plt.axis('off')
             plt.tight_layout()
-            plt.savefig('/Users/mobeets/Downloads/tmp/stark/task_h{}.pdf'.format(h))
+            plt.savefig(os.path.join(outdir, 'loss_{}.pdf'.format(h)))
             plt.close()
 
             for h, vs in Ls.items():
@@ -187,15 +188,20 @@ def main(args):
             plt.xlabel('hidden size')
             plt.ylabel('best loss')
             plt.tight_layout()
-            plt.savefig('/Users/mobeets/Downloads/tmp/stark/task.pdf'.format(h))
+            plt.savefig(os.path.join(outdir, 'loss_all.pdf'))
             plt.close()
         return
 
+def main(args):
+    Sessions = load_sessions(args.experiment, args.sessiondir)
+    plot_loss(Sessions, args.outdir)
     summary_plots(args.experiment, Sessions, args.outdir, args.hidden_size)
 
     pomdp, valuernn, untrainedrnn, valueesns = load_exemplar_models(args.experiment, args.indir, args.hidden_size, args.sigma)
     if args.experiment == 'babayan':
         single_rnn_plots_babayan(args.experiment, pomdp, valuernn, args.outdir)
+    elif args.experiment == 'babayan-interpolate':
+        plotting.misc.rpes_babayan_interpolate(Sessions, args.outdir, 'SuppFig4')
     elif 'starkweather' in args.experiment:
         single_rnn_plots_starkweather(args.experiment, pomdp, valuernn, untrainedrnn, args.outdir)
         if valueesns is not None:
@@ -204,7 +210,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--experiment', type=str,
-        choices=['babayan', 'starkweather-task1', 'starkweather-task2'],
+        choices=['babayan', 'babayan-interpolate', 'starkweather-task1', 'starkweather-task2'],
         help='which experiment to analyze')
     parser.add_argument('--hidden_size', type=int,
         default=50,

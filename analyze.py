@@ -30,11 +30,17 @@ def get_experiment(name, seed=None):
             ntrials_per_episode=1000,
             omission_probability=P_OMISSION if 'task2' in name else 0.0,
             iti_p=ITI_P, iti_min=ITI_MIN, t_padding=0)
-    elif name == 'babayan':
-        E = babayan.Babayan(nblocks=(100,100), # 1000 trials total
-            ntrials_per_block=(5,5),
-            reward_sizes_per_block=(1,10),
-            reward_times_per_block=(REWARD_TIME,REWARD_TIME),
+    elif 'babayan' in name:
+        if name == 'babayan':
+            reward_sizes_per_block = [1,10]
+            nblocks = (100,)*len(reward_sizes_per_block)
+        elif name == 'babayan-interpolate':
+            reward_sizes_per_block = [1,2,4,6,8,10]
+            nblocks = [39,3,3,3,3,39] # similar to training
+        E = babayan.Babayan(nblocks=nblocks, # 1000 trials total
+            ntrials_per_block=(5,)*len(reward_sizes_per_block),
+            reward_sizes_per_block=reward_sizes_per_block,
+            reward_times_per_block=(REWARD_TIME,)*len(reward_sizes_per_block),
             jitter=1, # lets reward time vary +/- jitter
             iti_p=ITI_P, iti_min=ITI_MIN,
             include_unique_rewards=False,
@@ -57,7 +63,7 @@ def get_modelfiles(experiment_name, indir, hidden_size=None):
             ignore_templates.append('*task2*')
         elif 'task2' in experiment_name:
             ignore_templates.append('*task1*')
-    elif experiment_name == 'babayan':
+    elif 'babayan' in experiment_name:
         model_name_templates = ['*babayan*']
         ignore_templates = ['*_initial*', '*starkweather*']
     if hidden_size is not None:
@@ -78,7 +84,7 @@ def rnn_model_is_valid(experiment_name, model):
             return False
         if 'task2' in experiment_name and model['p_omission_task_2'] != P_OMISSION:
             return False
-    elif experiment_name == 'babayan':
+    elif 'babayan' in experiment_name:
         if model.get('reward_time', None) != REWARD_TIME:
             return False
     if model['hidden_size'] not in [2,5,10,20,50,100]:
@@ -192,7 +198,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--experiment', type=str,
-        choices=['babayan', 'starkweather-task1', 'starkweather-task2'],
+        choices=['babayan', 'babayan-interpolate', 'starkweather-task1', 'starkweather-task2'],
         help='which experiment to analyze')
     parser.add_argument('-m', '--model_type', type=str,
         choices=['value-rnn-trained', 'value-rnn-untrained', 'value-esn', 'pomdp'],

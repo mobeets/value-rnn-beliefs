@@ -8,20 +8,24 @@ def add_states_and_beliefs(experiment_name, experiment, block_prior=0.5, belief_
         S, observations = analysis.beliefs_starkweather.get_states_and_observations(experiment.trials, cue=0, iti_min=experiment.iti_min)
         B = analysis.beliefs_starkweather.get_beliefs(observations, T, O)
     
-    elif experiment_name == 'babayan':
+    elif 'babayan' in experiment_name:
         assert len(np.unique(experiment.reward_times_per_block)) == 1
         reward_times = experiment.reward_times_per_block[0] + np.arange(-experiment.jitter, experiment.jitter+1)
         T, O = analysis.beliefs_babayan.pomdp(reward_times, p_omission=0.0, ITIhazard=experiment.iti_p, nITI_microstates=experiment.iti_min+1, jitter=experiment.jitter)
         X = np.vstack([x.X for x in experiment.trials])
+        reward_amounts = experiment.reward_sizes_per_block if experiment_name == 'babayan' else (experiment.reward_sizes_per_block[0], experiment.reward_sizes_per_block[-1])
         B, _ = analysis.beliefs_babayan.get_beliefs(X, T, O,
             prior=block_prior,
-            reward_amounts=experiment.reward_sizes_per_block,
+            reward_amounts=reward_amounts,
             reward_sigma=belief_reward_sigma,
             prior_by_prev_block=prior_by_prev_block,
             ntrials_per_block=experiment.ntrials_per_block)
-        S, _ = analysis.beliefs_babayan.get_states_and_observations(experiment.trials,
-            reward_amounts=experiment.reward_sizes_per_block,
-            iti_min=experiment.iti_min)
+        if len(experiment.reward_sizes_per_block) == 2:
+            S, _ = analysis.beliefs_babayan.get_states_and_observations(experiment.trials,
+                reward_amounts=experiment.reward_sizes_per_block,
+                iti_min=experiment.iti_min)
+        else:
+            S = np.nan*np.ones(len(B))
     else:
         raise Exception("Unrecognized experiment for getting beliefs: {}".format(experiment_name))
     

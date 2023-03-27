@@ -50,6 +50,9 @@ def analyze(model, experiments, pomdp=None, sigma=0, verbose=True, doDecode=True
         print("    Analyzing value and rpes.")
     session['results']['value'] = analysis.value.analyze(experiments, Trials, gamma=model['gamma'], pomdp=pomdp)
 
+    if model['experiment_name'] == 'babayan-interpolate':
+        return session
+
     # fit belief weights
     if model['model_type'] != 'pomdp':
         if verbose:

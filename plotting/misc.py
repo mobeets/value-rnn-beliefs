@@ -108,6 +108,36 @@ def rpes_babayan(models, outdir, figname):
         plt.savefig(os.path.join(outdir, figname + '_{}.pdf'.format(alignType)))
         plt.close()
 
+def rpes_babayan_interpolate(Sessions, outdir, figname):
+    plt.figure(figsize=(6,3))
+    for c,ti in enumerate([1,2]):
+        plt.subplot(1,2,c+1)
+
+        for model_type, models in Sessions.items():
+            if model_type == 'value-rnn-untrained':
+                continue
+            color = colors[model_type]
+            for model in models:
+                rpes = model['results']['value']['rpe_summary']
+                reward_sizes_per_block = np.unique([r for (_,r) in rpes.keys()])
+                ys = [rpes[(ti,r)] for r in reward_sizes_per_block]
+                ys = (ys - ys[0])/(ys[-1] - ys[0]) # normalize to rpe to smallest and largest reward
+                plt.plot(reward_sizes_per_block, ys, '.-', color=color, label=model_type)
+
+        plt.xlabel('Reward size', fontsize=12)
+        plt.ylabel('RPE (a.u.)', fontsize=12)
+        plt.ylim([-0.1,1.1])
+        plt.yticks(np.arange(0,1.05,0.2), fontsize=12)
+        if len(reward_sizes_per_block) < 7:
+            plt.xticks(reward_sizes_per_block, fontsize=12)
+        else:
+            plt.xticks([1, 5, 10], fontsize=12)
+        plt.plot(plt.xlim(), np.zeros(2), 'k-', zorder=-1, alpha=0.3)
+        plt.title('Trial {} in block'.format(ti), fontsize=14)
+    plt.tight_layout()
+    plt.savefig(os.path.join(outdir, figname + '.pdf'))
+    plt.close()
+
 def rpes_starkweather(experiment_name, model, outdir, iti_min, figname):
     plt.figure(figsize=(1.6, 1.8))
     name = model['model_type']
