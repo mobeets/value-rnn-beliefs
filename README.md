@@ -7,10 +7,18 @@ conda activate valuernn
 
 ## Fitting models
 
+```bash
+chmod +x bin/fit.sh
+./bin/fit.sh
+```
 
-## Analysis and plotting figures
+Approximate run time: 36 hours.
 
-```bash chmod +x runall.sh```
-```bash ./runall.sh```
+## Analyze and make figures
+
+```bash
+chmod +x bin/plot.sh
+./bin/plot.sh
+```
 
 The resulting figures will then be available at `data/figures/`.

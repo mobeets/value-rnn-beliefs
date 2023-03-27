@@ -1,5 +1,8 @@
+#!/bin/bash
+
 HIDDEN_SIZE=50
 DATADIR='/Users/mobeets/code/value-rnn/data'
+# DATADIR='valuernn/data'
 
 # Starkweather Task 1
 python analyze.py -e starkweather-task1 -m pomdp -i $DATADIR

@@ -1,12 +1,10 @@
 .DS_Store
 *.m~
 logs/*
-# data/figures/*
-# data/sessions/*
-# papers/*.pdf
-# data/
-*.pdf
-*.pickle
+data/models/*.pth
+data/models/*.json
+data/figures/*.pdf
+data/sessions/*.pickle
 *.pyc
 
 ## Core latex/pdflatex auxiliary files:
