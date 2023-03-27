@@ -154,6 +154,43 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
 
 def main(args):
     Sessions = load_sessions(args.experiment, args.sessiondir)
+
+    from plotting.base import plt
+    hs = [2,5,10,20,50,100]
+    for key, items in Sessions.items():
+        if key != 'value-rnn-trained':
+            continue
+        Ls = {}
+        for h in hs:
+            c = 0
+            Ls[h] = []
+            for i, rnn in enumerate(items):
+                if rnn['hidden_size'] != h:
+                    continue
+                c += 1
+                plt.subplot(3,4,c)
+                plt.plot(rnn['scores'], zorder=1)
+                plt.xlim([0,250])
+                plt.plot(plt.xlim(), [0,0], 'k-', zorder=-1, alpha=0.3)
+                plt.plot(plt.xlim(), [0.05,0.05], 'k-', zorder=-1, alpha=0.3)
+                plt.plot(plt.xlim(), min(rnn['scores'])*np.ones(2), 'r-', zorder=0, alpha=0.5)
+                plt.ylim([-0.002, 0.05])
+                Ls[h].append(min(rnn['scores']))
+                plt.axis('off')
+            plt.tight_layout()
+            plt.savefig('/Users/mobeets/Downloads/tmp/stark/task_h{}.pdf'.format(h))
+            plt.close()
+
+            for h, vs in Ls.items():
+                plt.plot(h*np.ones(len(vs)), vs, 'k.', alpha=0.5)
+                plt.plot(h, np.median(vs), 'ko', zorder=-1)
+            plt.xlabel('hidden size')
+            plt.ylabel('best loss')
+            plt.tight_layout()
+            plt.savefig('/Users/mobeets/Downloads/tmp/stark/task.pdf'.format(h))
+            plt.close()
+        return
+
     summary_plots(args.experiment, Sessions, args.outdir, args.hidden_size)
 
     pomdp, valuernn, untrainedrnn, valueesns = load_exemplar_models(args.experiment, args.indir, args.hidden_size, args.sigma)
