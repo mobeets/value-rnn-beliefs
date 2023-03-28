@@ -140,7 +140,7 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
             weightsfile = None
         if weightsfile:
             valuernns = [rnn for rnn in valuernns if rnn['weightsfile'] == weightsfile]
-        valuernn = session.analyze(valuernns[-1], experiments, pomdp, sigma, doDecode=False)
+        valuernn = session.analyze(valuernns[0], experiments, pomdp, sigma, doDecode=False)
     
     if 'starkweather' in args.experiment:
         untrainedrnns = analyze.get_models(experiment_name, 'value-rnn-untrained', indir, hidden_size)

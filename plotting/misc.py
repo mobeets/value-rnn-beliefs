@@ -75,7 +75,7 @@ def example_time_series(experiment_name, model, outdir, iti_min, figname,
 
 def rpes_babayan(models, outdir, figname):
     for alignType in ['CS', 'US']:
-        plt.figure(figsize=(2,2))
+        plt.figure(figsize=(1.7,2))
         for model in models:
             if model is None:
                 continue
@@ -104,6 +104,7 @@ def rpes_babayan(models, outdir, figname):
         plt.xticks(ts)
         plt.xlabel('Trial')
         plt.ylabel('RPE')
+        plt.yticks([])
         plt.tight_layout()
         plt.savefig(os.path.join(outdir, figname + '_{}.pdf'.format(alignType)))
         plt.close()
@@ -187,7 +188,11 @@ def example_trajectories(experiment_name, model, outdir, figname, showPretendOmi
     Z = np.vstack([trial.Z for trial in trials])
 
     odorResp = 'k'
-    rewResp = 'r'
+    if 'starkweather' in experiment_name:
+        rewColor = '#BB271A'
+    else:
+        rewRespSmall = '#0000C4'
+        rewRespBig = '#BB271A'
     nullResp = 'k'
     nullRespOmission = 'c'
     trialIndsToShow = [2] if 'starkweather' in experiment_name else [1,6]
@@ -216,8 +221,10 @@ def example_trajectories(experiment_name, model, outdir, figname, showPretendOmi
         
         if trial.y.sum() > 0:
             # plot reward response
+            if 'babayan' in experiment_name:
+                rewColor = rewRespSmall if trial.y.sum() < 5 else rewRespBig
             plt.plot(zs[trial.iti+trial.isi-1:trial.iti+trial.isi+1,xind], zs[trial.iti+trial.isi-1:trial.iti+trial.isi+1,yind],
-                    '-', color=rewResp, alpha=1, markersize=2, zorder=1)
+                    '-', color=rewColor, alpha=1, markersize=2, zorder=1)
             zorder = -1
         else:
             zorder = -2

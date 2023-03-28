@@ -18,7 +18,7 @@ ITI_P = 1/8
 ITI_MIN = 10
 GAMMA = 0.93
 P_OMISSION = 0.1 # starkweather only
-REWARD_TIME = 5 # babayan only
+REWARD_TIME = 10 # babayan only
 MIN_DATETIME = datetime(2023, 3, 26)
 ESN_GAINS = np.arange(0.1, 2.8, 0.2)
 
