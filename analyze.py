@@ -4,6 +4,7 @@ import json
 import pickle
 import argparse
 import numpy as np
+from datetime import datetime
 
 from valuernn.tasks import starkweather, babayan
 from valuernn.model import ValueRNN
@@ -18,6 +19,7 @@ ITI_MIN = 10
 GAMMA = 0.93
 P_OMISSION = 0.1 # starkweather only
 REWARD_TIME = 5 # babayan only
+MIN_DATETIME = datetime(2023, 3, 26)
 ESN_GAINS = np.arange(0.1, 2.8, 0.2)
 
 def get_experiment(name, seed=None):
@@ -86,6 +88,12 @@ def rnn_model_is_valid(experiment_name, model):
             return False
     elif 'babayan' in experiment_name:
         if model.get('reward_time', None) != REWARD_TIME:
+            return False
+    if 'time' not in model:
+        return False
+    else:
+        dt = datetime.strptime(model['time'], '%Y-%m-%d %H:%M:%S')
+        if dt < MIN_DATETIME:
             return False
     if model['hidden_size'] not in [2,5,10,20,50,100]:
         return False

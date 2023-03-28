@@ -24,7 +24,7 @@ def summary_by_gain(attr_name, Sessions, outdir, hidden_size, figname):
     xs = [item['gain'] for item in Sessions[key]]
     ys = [valgetter(item) for item in Sessions[key]]
 
-    plt.figure(figsize=(2.5,2.5))
+    plt.figure(figsize=(2,2))
     plt.plot(xs, ys, '.', color=esnColor)
 
     if attr_name in ['rpe-mse', 'belief-rsq']:
@@ -37,35 +37,39 @@ def summary_by_gain(attr_name, Sessions, outdir, hidden_size, figname):
     if attr_name == 'odor-memory':
         plt.yticks(ticks=[0,50,100,150,200])
         plt.ylim([0, 220])
-        plt.ylabel('Odor memory', fontsize=12)
+        plt.ylabel('Odor memory')
     elif attr_name == 'reward-memory':
         plt.yticks(ticks=[0,50,100,150,200])
         plt.ylim([0, 220])
-        plt.ylabel('Reward memory', fontsize=12)
+        plt.ylabel('Reward memory')
     elif attr_name == 'belief-rsq':
         plt.ylim([-0.02,1.02])
-        plt.ylabel('Belief $R^2$', fontsize=12)
+        plt.yticks([0, 0.5, 1.0])
+        plt.ylabel('Belief $R^2$')
+        plt.title('Task 2 ESNs')
     elif attr_name == 'rpe-mse':
-        plt.ylabel('RPE MSE', fontsize=12)
+        plt.ylabel('RPE MSE')
+        plt.yticks([0, 0.01])
+        plt.title('Task 2 ESNs')
     
-    plt.xlabel('Gain', fontsize=12)
+    plt.xlabel('Gain')
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()
 
-def activations(valueesns, outdir, figname, xmax=200):
+def activations(valueesns, outdir, figname, xmax=50):
     # Fig 8A-B: plot ESN activations vs time following odor input
-    plt.figure(figsize=(5,2.5))
+    plt.figure(figsize=(4,2))
     for i, rnn in enumerate(valueesns):
         plt.subplot(1,2,i+1)
         Ys = rnn['results']['memories']['odor_memories'][0]['trajectory']
         plt.plot(Ys, alpha=0.8)
-        plt.xlabel('Time steps rel.\nto odor input', fontsize=12)
-        plt.ylabel('Activation', fontsize=12)
+        plt.xlabel('Time steps rel. to odor')
+        plt.ylabel('Activation')
         plt.ylim(0.1*np.array([-1,1]))
         plt.xlim([0,xmax])
         plt.yticks([-0.2, 0, 0.2])
-        plt.title('ESN, Gain={}'.format(rnn['gain']), fontsize=14)
+        plt.title('ESN, Gain={}'.format(rnn['gain']), fontsize=12)
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()

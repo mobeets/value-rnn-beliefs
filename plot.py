@@ -128,9 +128,11 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
         valuernn = None
     else:
         if experiment_name == 'starkweather-task1':
-            weightsfile = os.path.join(indir, 'newloss_46377713_501_value_starkweather_task1_gru_h50_itimin10_1cues-v0.pth')
+            # weightsfile = os.path.join(indir, 'newloss_46377713_501_value_starkweather_task1_gru_h50_itimin10_1cues-v0.pth')
+            weightsfile = None
         elif experiment_name == 'starkweather-task2':
-            weightsfile = os.path.join(indir, 'newloss_46377799_501_value_starkweather_task2_gru_h50_itimin10_1cues-v0.pth')
+            # weightsfile = os.path.join(indir, 'newloss_46377799_501_value_starkweather_task2_gru_h50_itimin10_1cues-v0.pth')
+            weightsfile = None
         elif 'babayan' in experiment_name:
             # weightsfile = os.path.join(indir, 'newloss3_46474206_501_value_babayan_task_gru_h50_itimin10_1cues-v0.pth')
             weightsfile = None
