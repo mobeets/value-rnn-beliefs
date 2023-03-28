@@ -10,7 +10,7 @@ def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xmax=200):
     if len(rnns) == 0:
         print("ERROR: Could not find any value-rnn-trained, H={} models in processed sessions data.".format(hidden_size))
         return
-    plt.figure(figsize=(2.5,2.5))
+    plt.figure(figsize=(2,2))
     color = colors['value-rnn-trained']
     keyname = input_name if input_name == 'odor' else 'rew'
     for _, rnn in enumerate(rnns):
@@ -19,7 +19,7 @@ def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xmax=200):
             continue
         ds = mems[0]['distances']
         plt.plot(ds/ds.max(), alpha=0.8)
-    plt.xlabel('Time steps rel.\nto {} input'.format(input_name))
+    plt.xlabel('Time steps rel. to {}'.format(input_name))
     plt.ylabel('Rel. distance from ITI')
     plt.plot(xline*np.ones(2), [0, 1], '--', color=beliefColor)
     plt.ylim([0, 1.01])
@@ -36,7 +36,7 @@ def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name,
         print("ERROR: Could not find any value-rnn-trained, H={} models in processed sessions data.".format(hidden_size))
         return
 
-    plt.figure(figsize=(2.5,2.5))
+    plt.figure(figsize=(2,2))
     bins = np.linspace(0, xmax, 20)
     color = colors['value-rnn-trained']
 
@@ -57,7 +57,8 @@ def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name,
         plt.bar(xmax-width/2, len(vs)-ys.sum(), width=width, alpha=1.0, color=color)
     plt.plot(xline*np.ones(2), [0, 100], '--', color=beliefColor)
     
-    plt.xlabel('Memory duration')
+    lblname = input_name if input_name == 'odor' else 'rew.'
+    plt.xlabel('{} memory (time steps)'.format(lblname.capitalize()))
     plt.ylabel('% of RNNs')
     plt.xlim([-np.diff(xs).mean(), xmax])
     plt.ylim([0, 100])
