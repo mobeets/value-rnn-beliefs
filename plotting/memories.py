@@ -19,8 +19,8 @@ def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xmax=200):
             continue
         ds = mems[0]['distances']
         plt.plot(ds/ds.max(), alpha=0.8)
-    plt.xlabel('Time steps rel.\nto {} input'.format(input_name), fontsize=12)
-    plt.ylabel('Rel. distance from ITI', fontsize=12)
+    plt.xlabel('Time steps rel.\nto {} input'.format(input_name))
+    plt.ylabel('Rel. distance from ITI')
     plt.plot(xline*np.ones(2), [0, 1], '--', color=beliefColor)
     plt.ylim([0, 1.01])
     plt.xlim([0,xmax])

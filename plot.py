@@ -81,9 +81,11 @@ def single_rnn_plots_starkweather(experiment_name, pomdp, valuernn, untrainedrnn
     if experiment_name == 'starkweather-task2':
         plotting.misc.example_time_series(experiment_name, pomdp, outdir, iti_min, figname='Fig2_beliefs')
         if valuernn is not None:
-            plotting.misc.example_time_series(experiment_name, valuernn, outdir, iti_min, figname='Fig2_and_Fig4')
+            plotting.misc.example_time_series(experiment_name, valuernn, outdir, iti_min, figname='Fig2', showPredictions=False)
+            plotting.misc.example_time_series(experiment_name, valuernn, outdir, iti_min, figname='Fig4', showValueAndRpes=False)
         if untrainedrnn is not None:
-            plotting.misc.example_time_series(experiment_name, untrainedrnn, outdir, iti_min, figname='SuppFig1A')
+            plotting.misc.example_time_series(experiment_name, untrainedrnn, outdir, iti_min, figname='SuppFig1A',
+                showValueAndRpes=False, showPredictions=False)
 
     # Fig 3B, 3C: plot RPEs as a function of reward time
     figname = 'Fig3B_top' if 'task1' in experiment_name else 'Fig3B_bottom'

@@ -5,10 +5,12 @@ from plotting.base import plt, colors
 def get_plotting_info(experiment_name, attr_name, byModelSize=False):
     model_names = ['pomdp', 'value-rnn-untrained', 'value-rnn-trained']
     labels = ['Beliefs', 'Untrained RNN', 'Value RNN']
+    yticks = []
     if attr_name == 'rpe-mse':
         valgetter = lambda item: item['results']['value']['mse']['rpe_mse']
         ylbl = 'RPE MSE'
         yl = [-0.0006, 0.01]
+        yticks = [0, 0.01]
         model_names = model_names[1:]
         labels = labels[1:]
     elif attr_name == 'belief-rsq':
@@ -24,12 +26,12 @@ def get_plotting_info(experiment_name, attr_name, byModelSize=False):
             yl = [-0.5, 0.03] if not byModelSize else [-2, 0.03]
         else:
             yl = [-0.8, 0.05]
-    return model_names, labels, valgetter, ylbl, yl
+    return model_names, labels, valgetter, ylbl, yl, yticks
 
 def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname):
     # Figs 3D, 4B-C, 7D-E: plot RPE MSE, belief-rsq, and decoding-LL per model
-    model_names, labels, valgetter, ylbl, yl = get_plotting_info(experiment_name, attr_name)
-    plt.figure(figsize=(1.8,2.5))
+    model_names, labels, valgetter, ylbl, yl, yticks = get_plotting_info(experiment_name, attr_name)
+    plt.figure(figsize=(1.4,2.3))
     for xind, key in enumerate(model_names):
         if key not in Sessions:
             print("ERROR: Could not find any {} models in processed sessions data.".format(key))
@@ -54,21 +56,23 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname)
         plt.plot(xind*np.ones(len(vs)) + 0.1*(np.random.rand(len(vs))-0.5), vs, '.',
             markersize=5, color=color, markeredgewidth=0.5, markeredgecolor='k', alpha=1, zorder=1)
     
-    plt.xticks(ticks=range(len(model_names)), labels=labels, rotation=90, fontsize=12)
+    plt.xticks(ticks=range(len(model_names)), labels=labels, rotation=90)
     plt.xlim([-0.5, len(model_names)-0.5])
     plt.ylabel(ylbl)
     if yl:
         plt.ylim(yl)
+    if yticks:
+        plt.yticks(yticks)
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()
 
 def by_model_size(attr_name, experiment_name, Sessions, outdir, figname):
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
-    _, _, valgetter, ylbl, yl = get_plotting_info(experiment_name, attr_name, byModelSize=True)
+    _, _, valgetter, ylbl, yl, yticks = get_plotting_info(experiment_name, attr_name, byModelSize=True)
     model_names = ['value-rnn-trained']
 
-    plt.figure(figsize=(2.5,2.5))
+    plt.figure(figsize=(2,2))
     for key in model_names:
         if key not in Sessions:
             print("ERROR: Could not find any {} models in processed sessions data.".format(key))
@@ -101,6 +105,8 @@ def by_model_size(attr_name, experiment_name, Sessions, outdir, figname):
     plt.ylabel(ylbl)
     if yl:
         plt.ylim(yl)
+    if yticks:
+        plt.yticks(yticks)
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()

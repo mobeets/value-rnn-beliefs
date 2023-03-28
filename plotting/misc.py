@@ -9,10 +9,10 @@ def example_time_series(experiment_name, model, outdir, iti_min, figname,
     name = model['model_type']
     trials = model['Trials']['test']
     color = colors[name]
-    height = 1.5
+    height = 1.9
     if showPredictions: height += 0.5
     if showValueAndRpes: height += 2
-    plt.figure(figsize=(5, height))
+    plt.figure(figsize=(4.2, height))
 
     # plot odor and reward observations
     if showObservations:
@@ -20,10 +20,10 @@ def example_time_series(experiment_name, model, outdir, iti_min, figname,
         X = np.vstack([t.X for t in trials])
         for c in [0,1]:
             ts = np.where(X[inds,c] > 0)[0]
-            plt.plot(c/2 + np.zeros(len(inds)) + pad, 'k-', linewidth=1)
+            plt.plot(c/2.5 + np.zeros(len(inds)) + pad, 'k-', linewidth=1)
             for t in ts:
-                plt.plot([t, t], np.array([c, c+1])/2 + pad, 'k-', linewidth=1)
-            pad -= 1.3
+                plt.plot([t, t], np.array([c, c+1])/2.5 + pad, 'k-', linewidth=1)
+            pad -= 1.1
 
     # plot states
     S = np.hstack([trial.S for trial in trials])
@@ -124,16 +124,16 @@ def rpes_babayan_interpolate(Sessions, outdir, figname):
                 ys = (ys - ys[0])/(ys[-1] - ys[0]) # normalize to rpe to smallest and largest reward
                 plt.plot(reward_sizes_per_block, ys, '.-', color=color, label=model_type)
 
-        plt.xlabel('Reward size', fontsize=12)
-        plt.ylabel('RPE (a.u.)', fontsize=12)
+        plt.xlabel('Reward size')
+        plt.ylabel('RPE (a.u.)')
         plt.ylim([-0.1,1.1])
-        plt.yticks(np.arange(0,1.05,0.2), fontsize=12)
+        plt.yticks(np.arange(0,1.05,0.2))
         if len(reward_sizes_per_block) < 7:
-            plt.xticks(reward_sizes_per_block, fontsize=12)
+            plt.xticks(reward_sizes_per_block)
         else:
-            plt.xticks([1, 5, 10], fontsize=12)
+            plt.xticks([1, 5, 10])
         plt.plot(plt.xlim(), np.zeros(2), 'k-', zorder=-1, alpha=0.3)
-        plt.title('Trial {} in block'.format(ti), fontsize=14)
+        plt.title('Trial {} in block'.format(ti), fontsize=12)
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()
@@ -169,10 +169,9 @@ def rpes_starkweather(experiment_name, model, outdir, iti_min, figname):
         ysc = [vs_pre[xs_pre == xs[i]-1][0], vs[i], v_post]
         plt.plot(xsc, ysc, '-', linewidth=1, color=clrs[i], alpha=1)
 
-    plt.xlabel(xlbl, fontsize=12)
-    plt.ylabel(ylbl, fontsize=12)
-    plt.xticks(ticks=xs_pre[3::5], labels=(xs_pre[3::5]*0.2).astype(int), fontsize=12)
-    plt.yticks(fontsize=12)
+    plt.xlabel(xlbl)
+    plt.ylabel(ylbl)
+    plt.xticks(ticks=xs_pre[3::5], labels=(xs_pre[3::5]*0.2).astype(int))
     plt.yticks([])
     if yl:
         plt.ylim(yl)
@@ -286,8 +285,8 @@ def example_block_distances(model, outdir, figname):
         plt.plot(dists, '-', alpha=0.7, color=color)
     plt.xlim([-8, 400])
     plt.xticks([0, max_iti, 200])
-    plt.xlabel('Time rel. to odor', fontsize=12)
-    plt.ylabel('Dist. to fixed point', fontsize=12)
+    plt.xlabel('Time rel. to odor')
+    plt.ylabel('Dist. to fixed point')
 
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, figname + '.pdf'))
@@ -332,10 +331,10 @@ def heatmaps(model, outdir, figname):
 
     plt.figure(figsize=(2.7,2.5))
     plt.imshow(Zd, aspect='auto')
-    plt.xticks(ticks=[tPre,tPre+isi], labels=['Odor', 'Reward'], fontsize=10)
+    plt.xticks(ticks=[tPre,tPre+isi], labels=['Odor', 'Reward'])
     plt.yticks(ticks=[], labels=[])
-    plt.xlabel('Time$\\rightarrow$', fontsize=12)
-    plt.ylabel('Units', fontsize=12)
+    plt.xlabel('Time$\\rightarrow$')
+    plt.ylabel('Units')
     plt.tight_layout()
     cbar = plt.colorbar()
     cbar.ax.tick_params(labelsize=10)
