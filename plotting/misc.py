@@ -110,7 +110,7 @@ def rpes_babayan(models, outdir, figname):
         plt.close()
 
 def rpes_babayan_interpolate(Sessions, outdir, figname):
-    plt.figure(figsize=(6,3))
+    plt.figure(figsize=(4,2))
     for c,ti in enumerate([1,2]):
         plt.subplot(1,2,c+1)
 
@@ -124,23 +124,24 @@ def rpes_babayan_interpolate(Sessions, outdir, figname):
                 rpes = model['results']['value']['rpe_summary']
                 reward_sizes_per_block = np.unique([r for (_,r) in rpes.keys()])
                 ys = [rpes[(ti,r)] for r in reward_sizes_per_block]
-                plt.plot(reward_sizes_per_block, ys, '.',
-                    color=color, label=model_type, alpha=alpha)
                 yss.append(ys)
             yss = np.vstack(yss)
             mus = np.median(yss, axis=0)
-            plt.plot(reward_sizes_per_block, mus, '.-',
-                    color=color, label=model_type)
+            ses = np.std(yss, axis=0)/np.sqrt(yss.shape[0])
+            lbs = mus-ses; ubs = mus+ses
+            plt.plot(reward_sizes_per_block, mus, '.', markersize=8,
+                    color=color, label=model_type, zorder=0)
+            for r,lb,ub in zip(reward_sizes_per_block,lbs,ubs):
+                plt.plot(r*np.ones(2), [lb,ub], '-', color=color, zorder=-1)
 
         plt.xlabel('Reward size')
-        plt.ylabel('RPE (a.u.)')
+        plt.ylabel('RPE')
         # plt.ylim([-0.1,1.1])
         # plt.yticks(np.arange(0,1.05,0.2))
         if len(reward_sizes_per_block) < 7:
             plt.xticks(reward_sizes_per_block)
         else:
             plt.xticks([1, 5, 10])
-        plt.plot(plt.xlim(), np.zeros(2), 'k-', zorder=-1, alpha=0.3)
         plt.title('Trial {} in block'.format(ti), fontsize=12)
     plt.tight_layout()
     plt.savefig(os.path.join(outdir, figname + '.pdf'))
