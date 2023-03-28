@@ -2,6 +2,42 @@ import os.path
 import numpy as np
 from plotting.base import plt, colors
 
+def plot_loss(Sessions, outdir):
+    hs = [2,5,10,20,50,100]
+    for key, items in Sessions.items():
+        if key != 'value-rnn-trained':
+            continue
+        Ls = {}
+        for h in hs:
+            c = 0
+            Ls[h] = []
+            for i, rnn in enumerate(items):
+                if rnn['hidden_size'] != h:
+                    continue
+                c += 1
+                plt.subplot(3,4,c)
+                plt.plot(rnn['scores'], zorder=1)
+                plt.xlim([0,250])
+                plt.plot(plt.xlim(), [0,0], 'k-', zorder=-1, alpha=0.3)
+                plt.plot(plt.xlim(), [0.05,0.05], 'k-', zorder=-1, alpha=0.3)
+                plt.plot(plt.xlim(), min(rnn['scores'])*np.ones(2), 'r-', zorder=0, alpha=0.5)
+                plt.ylim([-0.002, 0.05])
+                Ls[h].append(min(rnn['scores']))
+                plt.axis('off')
+            plt.tight_layout()
+            plt.savefig(os.path.join(outdir, 'loss_{}.pdf'.format(h)))
+            plt.close()
+
+            for h, vs in Ls.items():
+                plt.plot(h*np.ones(len(vs)), vs, 'k.', alpha=0.5)
+                plt.plot(h, np.median(vs), 'ko', zorder=-1)
+            plt.xlabel('hidden size')
+            plt.ylabel('best loss')
+            plt.tight_layout()
+            plt.savefig(os.path.join(outdir, 'loss_all.pdf'))
+            plt.close()
+        return
+
 def get_plotting_info(experiment_name, attr_name, byModelSize=False):
     model_names = ['pomdp', 'value-rnn-untrained', 'value-rnn-trained']
     labels = ['Beliefs', 'Untrained RNN', 'Value RNN']

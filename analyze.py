@@ -33,12 +33,13 @@ def get_experiment(name, seed=None):
             omission_probability=P_OMISSION if 'task2' in name else 0.0,
             iti_p=ITI_P, iti_min=ITI_MIN, t_padding=0)
     elif 'babayan' in name:
-        if name == 'babayan':
+        if name == 'babayan':# or seed==TRAIN_SEED:
             reward_sizes_per_block = [1,10]
             nblocks = (100,)*len(reward_sizes_per_block)
         elif name == 'babayan-interpolate':
             reward_sizes_per_block = [1,2,4,6,8,10]
-            nblocks = [39,3,3,3,3,39] # similar to training
+            nblocks = (33,)*len(reward_sizes_per_block)
+            nblocks = [39,3,3,3,3,39]
         E = babayan.Babayan(nblocks=nblocks, # 1000 trials total
             ntrials_per_block=(5,)*len(reward_sizes_per_block),
             reward_sizes_per_block=reward_sizes_per_block,

@@ -122,7 +122,7 @@ def rpe_summary(E, trials):
         rpes = {}
         for c,ti in enumerate([1,2]):
             for r in E.reward_sizes_per_block:
-                crpes = [trial.rpe[-1] for trial in trials if trial.reward_size == r and hasattr(trial, 'rel_trial_index') and trial.rel_trial_index==(ti-1)]
+                crpes = [trial.rpe[-1] for trial in trials if trial.reward_size == r and hasattr(trial, 'rel_trial_index') and trial.rel_trial_index==(ti-1) and trial.prev_block_index is not None]
                 rpes[(ti,r)] = np.mean(crpes)
         return rpes
 

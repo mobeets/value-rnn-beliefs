@@ -14,12 +14,13 @@ def add_states_and_beliefs(experiment_name, experiment, block_prior=0.5, belief_
         T, O = analysis.beliefs_babayan.pomdp(reward_times, p_omission=0.0, ITIhazard=experiment.iti_p, nITI_microstates=experiment.iti_min+1, jitter=experiment.jitter)
         X = np.vstack([x.X for x in experiment.trials])
         reward_amounts = experiment.reward_sizes_per_block if experiment_name == 'babayan' else (experiment.reward_sizes_per_block[0], experiment.reward_sizes_per_block[-1])
+        ntrials_per_block = experiment.ntrials_per_block if experiment_name == 'babayan' else None
         B, _ = analysis.beliefs_babayan.get_beliefs(X, T, O,
             prior=block_prior,
             reward_amounts=reward_amounts,
             reward_sigma=belief_reward_sigma,
             prior_by_prev_block=prior_by_prev_block,
-            ntrials_per_block=experiment.ntrials_per_block)
+            ntrials_per_block=ntrials_per_block)
         if len(experiment.reward_sizes_per_block) == 2:
             S, _ = analysis.beliefs_babayan.get_states_and_observations(experiment.trials,
                 reward_amounts=experiment.reward_sizes_per_block,

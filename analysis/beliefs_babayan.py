@@ -72,11 +72,12 @@ def get_beliefs(observations, T, O, prior=0.5, reward_amounts=(1,10), reward_sig
         then duplicate the beliefs, weighting each by P and (1-P), respectively
     """
     if ntrials_per_block is None:
-        raise Exception("You need to pass ntrials_per_block to reset beliefs to prior")
-    assert len(np.unique(ntrials_per_block)) == 1
+        pass#raise Exception("You need to pass ntrials_per_block to reset beliefs to prior")
+    else:
+        assert len(np.unique(ntrials_per_block)) == 1
+        ntrials_per_block = ntrials_per_block[0]
     if prior_by_prev_block is not None:
         assert len(prior_by_prev_block) == len(reward_amounts)
-    ntrials_per_block = ntrials_per_block[0]
     
     b = initial_belief(T.shape[0])
     p = prior # we will only keep track of one block
@@ -99,8 +100,9 @@ def get_beliefs(observations, T, O, prior=0.5, reward_amounts=(1,10), reward_sig
             p = np.exp(logp - scipy.special.logsumexp(logp))
             p = p[0]
             rewards_seen += 1
-            last_reward_index_seen = reward_amounts.index(r)
-        if rewards_seen == ntrials_per_block:
+            if ntrials_per_block is not None:
+                last_reward_index_seen = reward_amounts.index(r)
+        if ntrials_per_block is not None and rewards_seen == ntrials_per_block:
             rewards_seen = 0
             if prior_by_prev_block is not None:
                 p = prior_by_prev_block[last_reward_index_seen]

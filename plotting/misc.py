@@ -118,17 +118,24 @@ def rpes_babayan_interpolate(Sessions, outdir, figname):
             if model_type == 'value-rnn-untrained':
                 continue
             color = colors[model_type]
+            alpha = 0.2 if 'rnn' in model_type else 1
+            yss = []
             for model in models:
                 rpes = model['results']['value']['rpe_summary']
                 reward_sizes_per_block = np.unique([r for (_,r) in rpes.keys()])
                 ys = [rpes[(ti,r)] for r in reward_sizes_per_block]
-                ys = (ys - ys[0])/(ys[-1] - ys[0]) # normalize to rpe to smallest and largest reward
-                plt.plot(reward_sizes_per_block, ys, '.-', color=color, label=model_type)
+                plt.plot(reward_sizes_per_block, ys, '.',
+                    color=color, label=model_type, alpha=alpha)
+                yss.append(ys)
+            yss = np.vstack(yss)
+            mus = np.median(yss, axis=0)
+            plt.plot(reward_sizes_per_block, mus, '.-',
+                    color=color, label=model_type)
 
         plt.xlabel('Reward size')
         plt.ylabel('RPE (a.u.)')
-        plt.ylim([-0.1,1.1])
-        plt.yticks(np.arange(0,1.05,0.2))
+        # plt.ylim([-0.1,1.1])
+        # plt.yticks(np.arange(0,1.05,0.2))
         if len(reward_sizes_per_block) < 7:
             plt.xticks(reward_sizes_per_block)
         else:
