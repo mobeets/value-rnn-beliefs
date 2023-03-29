@@ -19,7 +19,8 @@ ITI_MIN = 10
 GAMMA = 0.93
 P_OMISSION = 0.1 # starkweather only
 REWARD_TIME = 10 # babayan only
-MIN_DATETIME = datetime(2023, 3, 26)
+MIN_DATETIME = datetime(2023, 3, 19)
+MAX_DATETIME = datetime(2023, 3, 25)
 ESN_GAINS = np.arange(0.1, 2.8, 0.2)
 
 def get_experiment(name, seed=None):
@@ -33,12 +34,11 @@ def get_experiment(name, seed=None):
             omission_probability=P_OMISSION if 'task2' in name else 0.0,
             iti_p=ITI_P, iti_min=ITI_MIN, t_padding=0)
     elif 'babayan' in name:
-        if name == 'babayan':# or seed==TRAIN_SEED:
+        if name == 'babayan':
             reward_sizes_per_block = [1,10]
             nblocks = (100,)*len(reward_sizes_per_block)
         elif name == 'babayan-interpolate':
             reward_sizes_per_block = [1,2,4,6,8,10]
-            nblocks = (33,)*len(reward_sizes_per_block)
             nblocks = [39,3,3,3,3,39]
         E = babayan.Babayan(nblocks=nblocks, # 1000 trials total
             ntrials_per_block=(5,)*len(reward_sizes_per_block),
@@ -95,6 +95,8 @@ def rnn_model_is_valid(experiment_name, model):
     else:
         dt = datetime.strptime(model['time'], '%Y-%m-%d %H:%M:%S')
         if dt < MIN_DATETIME:
+            return False
+        if dt > MAX_DATETIME:
             return False
     if model['hidden_size'] not in [2,5,10,20,50,100]:
         return False

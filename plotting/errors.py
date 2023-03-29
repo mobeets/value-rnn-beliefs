@@ -29,6 +29,8 @@ def plot_loss(Sessions, outdir):
             plt.close()
 
             for h, vs in Ls.items():
+                if len(vs) == 0:
+                    continue
                 plt.plot(h*np.ones(len(vs)), vs, 'k.', alpha=0.5)
                 plt.plot(h, np.median(vs), 'ko', zorder=-1)
             plt.xlabel('hidden size')

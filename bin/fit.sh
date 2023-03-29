@@ -1,7 +1,7 @@
 #!/bin/bash
 
 N_MODELS=12
-N_EPOCHS=300
+N_EPOCHS=150
 SAVEDIR='data/models'
 DEFAULT_HIDDEN_SIZE=50
 
