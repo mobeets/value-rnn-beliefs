@@ -2,7 +2,7 @@ import os.path
 import numpy as np
 from plotting.base import plt, colors
 
-def plot_loss(Sessions, outdir):
+def plot_loss(experiment_name, Sessions, outdir):
     hs = [2,5,10,20,50,100]
     for key, items in Sessions.items():
         if key != 'value-rnn-trained':
@@ -19,13 +19,16 @@ def plot_loss(Sessions, outdir):
                 plt.plot(rnn['scores'], zorder=1)
                 plt.xlim([0,250])
                 plt.plot(plt.xlim(), [0,0], 'k-', zorder=-1, alpha=0.3)
-                plt.plot(plt.xlim(), [0.05,0.05], 'k-', zorder=-1, alpha=0.3)
+                if 'starkweather' in experiment_name:
+                    plt.plot(plt.xlim(), [0.05,0.05], 'k-', zorder=-1, alpha=0.3)
                 plt.plot(plt.xlim(), min(rnn['scores'])*np.ones(2), 'r-', zorder=0, alpha=0.5)
-                plt.ylim([-0.002, 0.05])
+                if 'starkweather' in experiment_name:
+                   plt.ylim([-0.002, 0.05])
                 Ls[h].append(min(rnn['scores']))
                 plt.axis('off')
             plt.tight_layout()
-            plt.savefig(os.path.join(outdir, 'loss_{}.pdf'.format(h)))
+            if len(Ls[h]) > 0:
+                plt.savefig(os.path.join(outdir, '{}_loss_{}.pdf'.format(experiment_name, h)))
             plt.close()
 
             for h, vs in Ls.items():
@@ -36,7 +39,7 @@ def plot_loss(Sessions, outdir):
             plt.xlabel('hidden size')
             plt.ylabel('best loss')
             plt.tight_layout()
-            plt.savefig(os.path.join(outdir, 'loss_all.pdf'))
+            plt.savefig(os.path.join(outdir, '{}_loss_all.pdf'.format(experiment_name)))
             plt.close()
         return
 
@@ -87,9 +90,9 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname)
         print('{} {} ({}, {:0.2f}: {:0.2f} ± {:0.2f})'.format(experiment_name, key, attr_name, np.median(vs), np.mean(vs), np.std(vs)/np.sqrt(len(vs))))
         color = colors[key]
 
-        if 'rnn' in key:
-            plt.plot(xind*np.ones(2), [lb, ub], '-',
-                color=color, linewidth=6, alpha=0.2, zorder=-1)
+        # if 'rnn' in key:
+        #     plt.plot(xind*np.ones(2), [lb, ub], '-',
+        #         color=color, linewidth=6, alpha=0.2, zorder=-1)
         plt.plot(xind, mu, 'o', color=color, alpha=1, zorder=0)
         plt.plot(xind*np.ones(len(vs)) + 0.1*(np.random.rand(len(vs))-0.5), vs, '.',
             markersize=5, color=color, markeredgewidth=0.5, markeredgecolor='k', alpha=1, zorder=1)
@@ -135,8 +138,8 @@ def by_model_size(attr_name, experiment_name, Sessions, outdir, figname):
         plt.plot(xsa, mus, 'o', color=color, zorder=0)
         plt.plot(xs + 0.0*(np.random.rand(len(vs))-0.5), vs, '.',
             markersize=5, color=color, markeredgewidth=0.5, markeredgecolor='k', alpha=1, zorder=1)
-        for (xs,lb,ub) in zip(xsa, lbs, ubs):
-            plt.plot(xs*np.ones(2), [lb,ub], '-', linewidth=6, color=color, alpha=0.2, zorder=-1)
+        # for (xs,lb,ub) in zip(xsa, lbs, ubs):
+        #     plt.plot(xs*np.ones(2), [lb,ub], '-', linewidth=6, color=color, alpha=0.2, zorder=-1)
         # plt.gca().fill_between(xsa, lbs, ubs, linewidth=0, alpha=0.2, color=color)
     plt.xlabel('# of units')
     plt.xscale('log')

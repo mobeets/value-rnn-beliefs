@@ -207,7 +207,7 @@ def example_trajectories(experiment_name, model, outdir, figname, showPretendOmi
     if 'starkweather' in experiment_name:
         trialIndsToShow = [i for i in range(len(trials)-1) if trials[i+1].iti > 20][:1]
     else:
-        trialIndsToShow = [1,6]
+        trialIndsToShow = [2,7]
     
     Trajs = [traj['trajectory'] for traj in model['results']['memories']['pretend_omission_trials']]
 
