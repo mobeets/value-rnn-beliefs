@@ -11,5 +11,7 @@ colors = {
     'pomdp': 'k',
     'value-rnn-trained': '#6311CE',
     'value-rnn-untrained': '#B793E5',
-    'value-esn': '#CC3432'
+    'value-esn': '#CC3432',
+    'rewRespSmall': '#0000C4',
+    'rewRespBig': '#BB271A',
 }

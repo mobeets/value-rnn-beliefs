@@ -197,10 +197,10 @@ def example_trajectories(experiment_name, model, outdir, figname, showPretendOmi
 
     odorResp = 'k'
     if 'starkweather' in experiment_name:
-        rewColor = '#BB271A'
+        rewColor = colors['rewRespBig']
     else:
-        rewRespSmall = '#0000C4'
-        rewRespBig = '#BB271A'
+        rewRespSmall = colors['rewRespSmall']
+        rewRespBig = colors['rewRespBig']
     nullResp = 'k'
     nullRespOmission = 'c'
     trialIndsToShow = [2] if 'starkweather' in experiment_name else [1,6]

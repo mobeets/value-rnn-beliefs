@@ -22,7 +22,7 @@ def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xtick, xmax=
 
     # plot rnns
     color = colors['value-rnn-trained']
-    for _, rnn in enumerate(rnns):
+    for i, rnn in enumerate(rnns):
         mems = rnn['results']['memories']['{}_memories'.format(keyname)]
         if len(mems) != 1:
             continue
@@ -31,7 +31,6 @@ def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xtick, xmax=
 
     plt.xlabel('Time steps rel. to {}'.format(input_name))
     plt.ylabel('Rel. distance from ITI')
-    # plt.plot(xline*np.ones(2), [0, 1], '--', color=beliefColor)
     plt.ylim([0, 1.01])
     plt.xlim([0, xmax])
     plt.xticks([0, xtick, xmax])
@@ -66,7 +65,8 @@ def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name,
         width = np.diff(xs[:-1]).mean()
         plt.bar(xs, 100*ys/len(vs), width=width, color=color)
         plt.bar(xmax-width/2, len(vs)-ys.sum(), width=width, alpha=1.0, color=color)
-    plt.plot(xline*np.ones(2), [0, 100], '--', color=beliefColor)
+    plt.plot(xline*np.ones(2), [0, 100], '--', linewidth=1, color=beliefColor)
+    # plt.bar(xline, 100, width=width, color=beliefColor, alpha=0.8)
     
     lblname = input_name if input_name == 'odor' else 'rew.'
     plt.xlabel('{} memory (time steps)'.format(lblname.capitalize()))
