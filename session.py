@@ -66,9 +66,8 @@ def analyze(model, experiments, pomdp=None, sigma=0, verbose=True, doDecode=True
         session['results']['state_decoding'] = analysis.decoding.analyze(model, Trials)
 
     # characterize dynamics
-    if model['model_type'] != 'pomdp':
-        if verbose:
-            print("    Analyzing dynamics.")
-        session['results']['memories'] = analysis.dynamics.analyze(model, Trials)
+    if verbose:
+        print("    Analyzing dynamics.")
+    session['results']['memories'] = analysis.dynamics.analyze(model, Trials)
 
     return session

@@ -126,7 +126,7 @@ def rpes_babayan_interpolate(Sessions, outdir, figname):
                 ys = [rpes[(ti,r)] for r in reward_sizes_per_block]
                 yss.append(ys)
             yss = np.vstack(yss)
-            mus = np.median(yss, axis=0)
+            mus = np.mean(yss, axis=0)
             ses = np.std(yss, axis=0)/np.sqrt(yss.shape[0])
             lbs = mus-ses; ubs = mus+ses
             plt.plot(reward_sizes_per_block, mus, '.', markersize=8,

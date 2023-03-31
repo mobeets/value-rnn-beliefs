@@ -94,8 +94,34 @@ def add_memory_trajectory_and_duration(rnn, h0, input_type, maxreps=MAXREPS, tol
     ds = np.vstack([np.linalg.norm(h-traj[0]) for h in traj[1:]])[:,0]
     return {'distances': ds, 'trajectory': traj, 'duration': len(traj), 'input_type': input_type}
 
+def add_memory_trajectories_pomdp(pomdp, trials):
+    # measure odor memories
+    inds = [i for i, trial in enumerate(trials) if trial.y.sum() == 0]
+    if len(inds) == 0:
+        ind = np.argmax([trial.isi for trial in trials])
+        B = trials[ind].B[trials[ind].iti:-1]
+    else:
+        ind = inds[0]
+        B = np.vstack([trials[ind].B[trials[ind].iti:], trials[ind+1].B[:trials[ind+1].iti]])
+    ITI = trials[ind].B[trials[ind].iti-1]
+    ds_odor = [np.linalg.norm(b-ITI) for b in B]
+
+    # measure reward memories
+    for ind, trial in enumerate(trials):
+        if trial.y.sum() > 0:
+            B = np.vstack([trial.B[trial.iti+trial.isi:], trials[ind+1].B[:trials[ind+1].iti]])
+            ds_rew = [np.linalg.norm(b-ITI) for b in B]
+            break
+
+    return {'odor_memories': ds_odor, 'rew_memories': ds_rew}
+
 def analyze(model, Trials):
-    trials = Trials['test'] # we do not use training trials for these analyses
+    trials = Trials['test'] # we do not need training trials for these analyses
+
+    if model['model_type'] == 'pomdp':
+        res = add_memory_trajectories_pomdp(model, trials)
+        return res
+
     fixed_points = find_fixed_points(model['model'], trials)
     n_fixed_points = len(fixed_points)
     if n_fixed_points != 1:

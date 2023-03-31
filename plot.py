@@ -58,9 +58,9 @@ def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAUL
 
     # Figs 5C, S2A: plot dsitances from ITI following odor/reward, across models
     figname = 'Fig5C_top' if 'task1' in experiment_name else 'Fig5C_bottom'
-    plotting.memories.traj(Sessions, outdir, hidden_size, isi_max, 'odor', figname=figname)
+    plotting.memories.traj(Sessions, outdir, hidden_size, isi_max, 'odor', figname=figname, xtick=DEFAULT_ISI_MAX)
     figname = 'SuppFig2A_top' if 'task1' in experiment_name else 'SuppFig2A_bottom'
-    plotting.memories.traj(Sessions, outdir, hidden_size, iti_min, 'reward', figname=figname)
+    plotting.memories.traj(Sessions, outdir, hidden_size, iti_min, 'reward', figname=figname, xtick=DEFAULT_ITI_MIN)
 
     # Figs 5D, S2B: plot histogram of odor/reward memories, across models
     figname = 'Fig5D_top' if 'task1' in experiment_name else 'Fig5D_bottom'
