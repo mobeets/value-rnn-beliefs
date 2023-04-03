@@ -50,23 +50,17 @@ def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAUL
 
     if 'babayan' in experiment_name:
         return
+
+    # Figs 5C, 5D: plot distances from ITI following odor/reward, across models
+    figname = 'Fig5C_top' if 'task1' in experiment_name else 'Fig5C_bottom'
+    plotting.memories.traj(Sessions, outdir, hidden_size, isi_max, 'odor', figname=figname, xtick=DEFAULT_ISI_MAX)
+    figname = 'Fig5D_top' if 'task1' in experiment_name else 'Fig5D_bottom'
+    plotting.memories.traj(Sessions, outdir, hidden_size, iti_min, 'reward', figname=figname, xtick=DEFAULT_ITI_MIN)
     
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
     if experiment_name == 'starkweather-task2':
         for figname, attr_name in zip(['Fig6A', 'Fig6B', 'Fig6C'], ['rpe-mse', 'belief-rsq', 'state-LL']):
             plotting.errors.by_model_size(attr_name, experiment_name, Sessions, outdir, figname=figname)
-
-    # Figs 5C, S2A: plot dsitances from ITI following odor/reward, across models
-    figname = 'Fig5C_top' if 'task1' in experiment_name else 'Fig5C_bottom'
-    plotting.memories.traj(Sessions, outdir, hidden_size, isi_max, 'odor', figname=figname, xtick=DEFAULT_ISI_MAX)
-    figname = 'SuppFig2A_top' if 'task1' in experiment_name else 'SuppFig2A_bottom'
-    plotting.memories.traj(Sessions, outdir, hidden_size, iti_min, 'reward', figname=figname, xtick=DEFAULT_ITI_MIN)
-
-    # Figs 5D, S2B: plot histogram of odor/reward memories, across models
-    figname = 'Fig5D_top' if 'task1' in experiment_name else 'Fig5D_bottom'
-    plotting.memories.histogram(experiment_name, Sessions, outdir, hidden_size, isi_max, 'odor', figname=figname)
-    figname = 'SuppFig2B_top' if 'task1' in experiment_name else 'SuppFig2B_bottom'
-    plotting.memories.histogram(experiment_name, Sessions, outdir, hidden_size, iti_min, 'reward', figname=figname)
 
 def esn_plots(experiment_name, Sessions, valueesns, outdir, hidden_size):
     # Fig 8A-B: plot ESN activations vs time following odor input
@@ -132,8 +126,6 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
         weightsfile = None
         if experiment_name == 'starkweather-task1':
             weightsfile = os.path.join(indir, 'newloss_46377719_501_value_starkweather_task1_gru_h50_itimin10_1cues-v0.pth')
-            # weightsfile = os.path.join(indir, 'newloss_46377725_501_value_starkweather_task1_gru_h50_itimin10_1cues-v0.pth')
-            # print("DEBUGGING!")
         elif experiment_name == 'starkweather-task2':
             weightsfile = os.path.join(indir, 'newloss_46377799_501_value_starkweather_task2_gru_h50_itimin10_1cues-v0.pth')
         elif 'babayan' in experiment_name:
@@ -168,7 +160,7 @@ def main(args):
     if args.experiment == 'babayan':
         single_rnn_plots_babayan(args.experiment, pomdp, valuernn, args.outdir)
     elif args.experiment == 'babayan-interpolate':
-        plotting.misc.rpes_babayan_interpolate(Sessions, args.outdir, 'SuppFig4')
+        plotting.misc.rpes_babayan_interpolate(Sessions, args.outdir, 'SuppFig2')
     elif 'starkweather' in args.experiment:
         single_rnn_plots_starkweather(args.experiment, pomdp, valuernn, untrainedrnn, args.outdir)
         if valueesns is not None:

@@ -5,7 +5,7 @@ from plotting.base import plt, colors
 beliefColor = colors['pomdp']
 
 def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xtick, xmax=50):
-    # Figs 5C, S2A: plot distance from ITI following observations, across models
+    # Figs 5C, 5D: plot distance from ITI following observations, across models
     rnns = [rnn for rnn in Sessions.get('value-rnn-trained', []) if rnn['hidden_size'] == hidden_size]
     if len(rnns) == 0:
         print("ERROR: Could not find any value-rnn-trained, H={} models in processed sessions data.".format(hidden_size))
@@ -40,7 +40,6 @@ def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xtick, xmax=
     plt.close()
 
 def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name, figname, xmax=200):
-    # Figs 5D, S2B: plot histogram of odor/reward memories
     rnns = [rnn for rnn in Sessions.get('value-rnn-trained', []) if rnn['hidden_size'] == hidden_size]
     if len(rnns) == 0:
         print("ERROR: Could not find any value-rnn-trained, H={} models in processed sessions data.".format(hidden_size))
@@ -66,7 +65,6 @@ def histogram(experiment_name, Sessions, outdir, hidden_size, xline, input_name,
         plt.bar(xs, 100*ys/len(vs), width=width, color=color)
         plt.bar(xmax-width/2, len(vs)-ys.sum(), width=width, alpha=1.0, color=color)
     plt.plot(xline*np.ones(2), [0, 100], '--', linewidth=1, color=beliefColor)
-    # plt.bar(xline, 100, width=width, color=beliefColor, alpha=0.8)
     
     lblname = input_name if input_name == 'odor' else 'rew.'
     plt.xlabel('{} memory (time steps)'.format(lblname.capitalize()))

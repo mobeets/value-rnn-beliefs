@@ -6,6 +6,7 @@ esnColor = colors['value-esn']
 rnnColor = colors['value-rnn-trained']
 
 def summary_by_gain(attr_name, Sessions, outdir, hidden_size, figname):
+    # Fig 8C-E: plot odor memory, RPE MSE, and belief-rsq vs gain for ESNs
     if attr_name == 'odor-memory':
         ngetter = lambda item: len(item['results']['memories']['odor_memories'])
         valgetter = lambda item: item['results']['memories']['odor_memories'][0]['duration'] if ngetter(item) > 0 else np.nan

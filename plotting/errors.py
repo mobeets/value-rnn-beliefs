@@ -90,9 +90,6 @@ def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname)
         print('{} {} ({}, {:0.2f}: {:0.2f} ± {:0.2f})'.format(experiment_name, key, attr_name, np.median(vs), np.mean(vs), np.std(vs)/np.sqrt(len(vs))))
         color = colors[key]
 
-        # if 'rnn' in key:
-        #     plt.plot(xind*np.ones(2), [lb, ub], '-',
-        #         color=color, linewidth=6, alpha=0.2, zorder=-1)
         plt.plot(xind, mu, 'o', color=color, alpha=1, zorder=0)
         plt.plot(xind*np.ones(len(vs)) + 0.1*(np.random.rand(len(vs))-0.5), vs, '.',
             markersize=5, color=color, markeredgewidth=0.5, markeredgecolor='k', alpha=1, zorder=1)
@@ -138,9 +135,6 @@ def by_model_size(attr_name, experiment_name, Sessions, outdir, figname):
         plt.plot(xsa, mus, 'o', color=color, zorder=0)
         plt.plot(xs + 0.0*(np.random.rand(len(vs))-0.5), vs, '.',
             markersize=5, color=color, markeredgewidth=0.5, markeredgecolor='k', alpha=1, zorder=1)
-        # for (xs,lb,ub) in zip(xsa, lbs, ubs):
-        #     plt.plot(xs*np.ones(2), [lb,ub], '-', linewidth=6, color=color, alpha=0.2, zorder=-1)
-        # plt.gca().fill_between(xsa, lbs, ubs, linewidth=0, alpha=0.2, color=color)
     plt.xlabel('# of units')
     plt.xscale('log')
     plt.ylabel(ylbl)

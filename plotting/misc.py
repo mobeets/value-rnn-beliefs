@@ -136,8 +136,6 @@ def rpes_babayan_interpolate(Sessions, outdir, figname):
 
         plt.xlabel('Reward size')
         plt.ylabel('RPE')
-        # plt.ylim([-0.1,1.1])
-        # plt.yticks(np.arange(0,1.05,0.2))
         if len(reward_sizes_per_block) < 7:
             plt.xticks(reward_sizes_per_block)
         else:
