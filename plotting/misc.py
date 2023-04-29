@@ -155,7 +155,7 @@ def rpes_starkweather(experiment_name, model, outdir, iti_min, figname):
     val_getter_post = lambda item: item['results']['value']['rpe_summary']['rpes_end']
     xlbl = 'Time (s)'
     ylbl = 'RPE'
-    yl = [-0.3, 0.75] if experiment_name == 'starkweather' else [-0.5, 1.6]
+    yl = [-0.25, 0.55] if 'starkweather' in experiment_name else [-0.5, 1.6]
     
     vs_pre = val_getter_pre(model)
     vs = val_getter(model)

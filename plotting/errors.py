@@ -67,6 +67,10 @@ def get_plotting_info(experiment_name, attr_name, byModelSize=False):
             yl = [-0.5, 0.03] if not byModelSize else [-2, 0.03]
         else:
             yl = [-0.8, 0.05]
+    elif attr_name == 'RSA':
+        valgetter = lambda item: item['results']['belief_regression']['rsa']
+        ylbl = 'Cosine similarity'
+        yl = [-1, 1]
     return model_names, labels, valgetter, ylbl, yl, yticks
 
 def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname):
