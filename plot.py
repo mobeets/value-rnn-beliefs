@@ -59,7 +59,7 @@ def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAUL
     
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
     if experiment_name == 'starkweather-task2':
-        for figname, attr_name in zip(['Fig6A', 'Fig6B', 'Fig6C', 'FigX'], ['rpe-mse', 'belief-rsq', 'state-LL', 'RSA']):
+        for figname, attr_name in zip(['Fig6A', 'Fig6B', 'Fig6C'], ['rpe-mse', 'belief-rsq', 'state-LL']):
             plotting.errors.by_model_size(attr_name, experiment_name, Sessions, outdir, figname=figname)
 
 def esn_plots(experiment_name, Sessions, valueesns, outdir, hidden_size):
