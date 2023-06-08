@@ -11,4 +11,4 @@ do
 	python valuernn/quick_train.py test --experiment starkweather -k $i -t 2 -n $N_MODELS --n_epochs $N_EPOCHS -d $SAVEDIR
 done
 
-python valuernn/quick_train.py test --experiment babayan --ntrials_per_episode 50 -k $DEFAULT_HIDDEN_SIZE -n $N_MODELS --n_epochs $N_EPOCHS -d $SAVEDIR
+python valuernn/quick_train.py test --experiment babayan --ntrials_per_episode 50 --reward_time 10 -k $DEFAULT_HIDDEN_SIZE -n $N_MODELS --n_epochs $N_EPOCHS -d $SAVEDIR

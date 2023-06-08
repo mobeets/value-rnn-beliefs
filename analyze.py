@@ -19,9 +19,14 @@ ITI_MIN = 10
 GAMMA = 0.93
 P_OMISSION = 0.1 # starkweather only
 REWARD_TIME = 10 # babayan only
-MIN_DATETIME = datetime(2023, 3, 19)
-MAX_DATETIME = datetime(2023, 3, 25)
 ESN_GAINS = np.arange(0.1, 2.8, 0.2)
+REPRODUCE_PAPER = False
+if REPRODUCE_PAPER:
+    MIN_DATETIME = datetime(2023, 3, 19)
+    MAX_DATETIME = datetime(2023, 3, 25)
+else:
+    MIN_DATETIME = None
+    MAX_DATETIME = None
 
 def get_experiment(name, seed=None):
     if seed is not None:
@@ -94,9 +99,9 @@ def rnn_model_is_valid(experiment_name, model):
         return False
     else:
         dt = datetime.strptime(model['time'], '%Y-%m-%d %H:%M:%S')
-        if dt < MIN_DATETIME:
+        if MIN_DATETIME and dt < MIN_DATETIME:
             return False
-        if dt > MAX_DATETIME:
+        if MAX_DATETIME and dt > MAX_DATETIME:
             return False
     if model['hidden_size'] not in [2,5,10,20,50,100]:
         return False

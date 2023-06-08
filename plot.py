@@ -7,6 +7,7 @@ import analyze
 import session
 import plotting.errors, plotting.memories, plotting.esns, plotting.misc
 
+REPRODUCE_PAPER = False
 DEFAULT_ISI_MAX = 14 # Starkweather only
 DEFAULT_ITI_MIN = 10 # Starkweather only
 
@@ -124,12 +125,13 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
         valuernn = None
     else:
         weightsfile = None
-        if experiment_name == 'starkweather-task1':
-            weightsfile = os.path.join(indir, 'newloss_46377719_501_value_starkweather_task1_gru_h50_itimin10_1cues-v0.pth')
-        elif experiment_name == 'starkweather-task2':
-            weightsfile = os.path.join(indir, 'newloss_46377799_501_value_starkweather_task2_gru_h50_itimin10_1cues-v0.pth')
-        elif 'babayan' in experiment_name:
-            weightsfile = os.path.join(indir, 'newloss4_47062592_501_value_babayan_task_gru_h50_itimin10_1cues-v0.pth')
+        if REPRODUCE_PAPER:
+            if experiment_name == 'starkweather-task1':
+                weightsfile = os.path.join(indir, 'newloss_46377719_501_value_starkweather_task1_gru_h50_itimin10_1cues-v0.pth')
+            elif experiment_name == 'starkweather-task2':
+                weightsfile = os.path.join(indir, 'newloss_46377799_501_value_starkweather_task2_gru_h50_itimin10_1cues-v0.pth')
+            elif 'babayan' in experiment_name:
+                weightsfile = os.path.join(indir, 'newloss4_47062592_501_value_babayan_task_gru_h50_itimin10_1cues-v0.pth')
         if weightsfile:
             valuernns = [rnn for rnn in valuernns if os.path.split(rnn['weightsfile'])[-1] == os.path.split(weightsfile)[-1]]
         valuernn = session.analyze(valuernns[0], experiments, pomdp, sigma, doDecode=False)
