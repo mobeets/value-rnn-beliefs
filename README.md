@@ -30,3 +30,5 @@ chmod +x bin/run.sh
 ```
 
 The resulting figures will then be available at `data/figures/`.
+
+(Note: If you encounter an error on Mac regarding `libomp.dylib`, try `conda install nomkl`.)
