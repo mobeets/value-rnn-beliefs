@@ -18,8 +18,8 @@ if $DO_ANALYZE
 then
 	python analyze.py -e starkweather-task2 -m pomdp -i $DATADIR
 	python analyze.py -e starkweather-task2 -m value-rnn-trained -i $DATADIR
-	# python analyze.py -e starkweather-task2 -m value-rnn-untrained -i $DATADIR
-	# python analyze.py -e starkweather-task2 -m value-esn -i $DATADIR --hidden_size $HIDDEN_SIZE
+	python analyze.py -e starkweather-task2 -m value-rnn-untrained -i $DATADIR
+	python analyze.py -e starkweather-task2 -m value-esn -i $DATADIR --hidden_size $HIDDEN_SIZE
 fi
 python plot.py -e starkweather-task2 -i $DATADIR
 
