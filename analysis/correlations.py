@@ -78,5 +78,5 @@ def analyze(model, Trials):
     results = {}
     results['weights'] = fit_belief_weights(Trials['train'])
     results['rsq'] = add_and_score_belief_prediction(Trials['test'], results['weights'])
-    results['rdm'], results['rsa'] = get_rsa(Trials['test'])
+    # results['rdm'], results['rsa'] = get_rsa(Trials['test'])
     return results
