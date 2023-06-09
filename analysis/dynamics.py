@@ -132,10 +132,6 @@ def analyze(model, Trials):
     for fixed_point in fixed_points:
         odor_memories.append(add_memory_trajectory_and_duration(model['model'], fixed_point, 'odor'))
         rew_memories.append(add_memory_trajectory_and_duration(model['model'], fixed_point, 'reward'))
-    if n_fixed_points == 1:
-        ds = rew_memories[0]['distances']
-        if len(ds) > 50 and ds[50]/ds.max() > 0.5:
-            1/0
     res = {'fixed_points': fixed_points, 'n_fixed_points': n_fixed_points, 'odor_memories': odor_memories, 'rew_memories': rew_memories}
     
     # find trajectories on omission trials
