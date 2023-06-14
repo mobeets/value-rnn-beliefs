@@ -67,10 +67,14 @@ def get_plotting_info(experiment_name, attr_name, byModelSize=False):
             yl = [-0.5, 0.03] if not byModelSize else [-2, 0.03]
         else:
             yl = [-0.8, 0.05]
-    elif attr_name == 'RSA':
-        valgetter = lambda item: item['results']['belief_regression']['rsa']
-        ylbl = 'Cosine similarity'
-        yl = [-1, 1]
+    elif attr_name == 'memory-difference':
+        o_ngetter = lambda item: len(item['results']['memories']['odor_memories'])
+        o_valgetter = lambda item: item['results']['memories']['odor_memories'][0]['duration'] if o_ngetter(item) > 0 else np.nan
+        r_ngetter = lambda item: len(item['results']['memories']['rew_memories'])
+        r_valgetter = lambda item: item['results']['memories']['rew_memories'][0]['duration'] if r_ngetter(item) > 0 else np.nan
+        valgetter = lambda item: o_valgetter(item) - r_valgetter(item)
+        ylbl = 'Odor - Reward Memory'
+        yl = [-10, 40]
     return model_names, labels, valgetter, ylbl, yl, yticks
 
 def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname):
@@ -130,7 +134,7 @@ def by_model_size(attr_name, experiment_name, Sessions, outdir, figname):
             continue
         xs = [item['hidden_size'] for item in items]
         xsa = np.unique(xs)
-        mus = np.array([np.median([v for x,v in zip(xs,vs) if x == xc]) for xc in xsa])
+        mus = np.array([np.nanmedian([v for x,v in zip(xs,vs) if x == xc]) for xc in xsa])
         # sef = lambda xs: np.std(xs)/np.sqrt(len(xs))
         # ses = np.array([sef([v for x,v in zip(xs,vs) if x == xc]) for xc in xsa])
         # lbs = mus-ses; ubs = mus+ses
@@ -139,6 +143,8 @@ def by_model_size(attr_name, experiment_name, Sessions, outdir, figname):
         plt.plot(xsa, mus, 'o', color=color, zorder=0)
         plt.plot(xs + 0.0*(np.random.rand(len(vs))-0.5), vs, '.',
             markersize=5, color=color, markeredgewidth=0.5, markeredgecolor='k', alpha=1, zorder=1)
+        if 'memory' in attr_name:
+            plt.plot(plt.xlim(), [0, 0], 'k-', linewidth=1, zorder=-1)
     plt.xlabel('# of units')
     plt.xscale('log')
     plt.ylabel(ylbl)

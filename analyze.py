@@ -19,7 +19,7 @@ ITI_MIN = 10
 GAMMA = 0.93
 P_OMISSION = 0.1 # starkweather only
 REWARD_TIME = 10 # babayan only
-ESN_GAINS = np.arange(0.1, 2.8, 0.2)
+ESN_GAINS = np.round(np.tile(np.arange(0.1, 2.8, 0.2), 12), 2)
 REPRODUCE_PAPER = False
 if REPRODUCE_PAPER:
     MIN_DATETIME = datetime(2023, 3, 19)

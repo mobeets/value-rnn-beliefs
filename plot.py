@@ -10,6 +10,7 @@ import plotting.errors, plotting.memories, plotting.esns, plotting.misc
 REPRODUCE_PAPER = False
 DEFAULT_ISI_MAX = 14 # Starkweather only
 DEFAULT_ITI_MIN = 10 # Starkweather only
+ESN_GAIN_TO_PLOT = 1.9 # Starkweather-task2 only
 
 def load_sessions(experiment_name, sessiondir):
     template = '{}_*'.format(experiment_name)
@@ -60,16 +61,19 @@ def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAUL
     
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
     if experiment_name == 'starkweather-task2':
-        for figname, attr_name in zip(['Fig6A', 'Fig6B', 'Fig6C'], ['rpe-mse', 'belief-rsq', 'state-LL']):
+        for figname, attr_name in zip(['Fig6A', 'Fig6B', 'Fig6C', 'Fig6D'], ['rpe-mse', 'belief-rsq', 'state-LL', 'memory-difference']):
             plotting.errors.by_model_size(attr_name, experiment_name, Sessions, outdir, figname=figname)
 
-def esn_plots(experiment_name, Sessions, valueesns, outdir, hidden_size):
+def esn_plots(experiment_name, Sessions, valueesns, outdir, hidden_size, gain_to_plot=ESN_GAIN_TO_PLOT):
     # Fig 8A-B: plot ESN activations vs time following odor input
     plotting.esns.activations(valueesns, outdir, figname='Fig8A-B')
 
-    # Fig 8C-E: plot odor memory, RPE MSE, and belief-rsq vs gain for ESNs
-    for figname, attr_name in zip(['Fig8C', 'Fig8D', 'Fig8E'], ['odor-memory', 'rpe-mse', 'belief-rsq']):
+    # Fig 8C-G: plot odor memory, RPE MSE, and belief-rsq vs gain for ESNs
+    for figname, attr_name in zip(['Fig8C', 'Fig8D', 'Fig8E', 'Fig8F', 'Fig8G'], ['rpe-mse', 'belief-rsq', 'state-LL', 'odor-memory', 'reward-memory']):
         plotting.esns.summary_by_gain(attr_name, Sessions, outdir, hidden_size, figname=figname)
+    
+    # Fig 8H: compare odor and reward memories
+    plotting.esns.memory_comparison(Sessions, hidden_size, gain_to_plot, outdir, figname='Fig8H')
 
 def single_rnn_plots_starkweather(experiment_name, pomdp, valuernn, untrainedrnn, outdir, iti_min=DEFAULT_ITI_MIN):
     # Fig 2, Fig 4, Fig S1A: plot observations, model activity, value estimate, and RPE on example trials

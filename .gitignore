@@ -5,6 +5,7 @@ data/models/*.pth
 data/models/*.json
 data/figures/*.pdf
 data/sessions/*.pickle
+data/memories/*
 *.pyc
 
 ## Core latex/pdflatex auxiliary files:
