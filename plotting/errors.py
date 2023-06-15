@@ -90,7 +90,7 @@ def get_plotting_info(experiment_name, attr_name, byModelSize=False, hidden_size
 def by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname, gain_to_plot=None):
     # Figs 3D, 4B-C, 7D-E: plot RPE MSE, belief-rsq, and decoding-LL per model
     model_names, labels, valgetter, ylbl, yl, yticks = get_plotting_info(experiment_name, attr_name, hidden_size=hidden_size)
-    plt.figure(figsize=(1.4,2.33))
+    plt.figure(figsize=(1.4,2.34))
     for xind, key in enumerate(model_names):
         if key not in Sessions:
             print("ERROR: Could not find any {} models in processed sessions data.".format(key))

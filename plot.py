@@ -38,6 +38,11 @@ def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAUL
         attrnames = ['rpe-mse', 'belief-rsq', 'state-LL', 'memory-difference', 'memory-difference-with-esn']
         fignames = ['Fig3D', 'Fig4B', 'Fig4C', 'Fig5E', 'Fig8H']
         fignames = [x + ('_top' if 'task1' in experiment_name else '_bottom') for x in fignames]
+        if 'task1' in experiment_name:
+            attrnames = attrnames[:-1]
+            fignames = fignames[:-1]
+        elif 'task2' in experiment_name:
+            fignames[-1] = fignames[-1].replace('_bottom', '')
     else:
         attrnames = ['belief-rsq', 'state-LL']
         fignames = ['Fig7D', 'Fig7E']
@@ -74,9 +79,6 @@ def esn_plots(experiment_name, Sessions, valueesns, outdir, hidden_size, gain_to
     # Fig 8C-G: plot odor memory, RPE MSE, and belief-rsq vs gain for ESNs
     for figname, attr_name in zip(['Fig8C', 'Fig8D', 'Fig8E', 'Fig8F', 'Fig8G'], ['rpe-mse', 'belief-rsq', 'state-LL', 'odor-memory', 'reward-memory']):
         plotting.esns.summary_by_gain(attr_name, Sessions, outdir, hidden_size, figname=figname)
-    
-    # Fig 8H: compare odor and reward memories
-    plotting.esns.memory_comparison(Sessions, hidden_size, gain_to_plot, outdir, figname='Fig8H')
 
 def single_rnn_plots_starkweather(experiment_name, pomdp, valuernn, untrainedrnn, outdir, iti_min=DEFAULT_ITI_MIN):
     # Fig 2, Fig 4, Fig S1A: plot observations, model activity, value estimate, and RPE on example trials
