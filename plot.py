@@ -29,20 +29,20 @@ def load_sessions(experiment_name, sessiondir):
             Sessions[key] = sessions
     return Sessions
 
-def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAULT_ITI_MIN, isi_max=DEFAULT_ISI_MAX):
+def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAULT_ITI_MIN, isi_max=DEFAULT_ISI_MAX, gain_to_plot=ESN_GAIN_TO_PLOT):
     if experiment_name == 'babayan-interpolate':
         return
     
     # Figs 3D, 4B-C, 7D-E: plot RPE MSE, belief-rsq, and decoding-LL per model
     if 'starkweather' in experiment_name:
-        attrnames = ['rpe-mse', 'belief-rsq', 'state-LL']
-        fignames = ['Fig3D', 'Fig4B', 'Fig4C']
+        attrnames = ['rpe-mse', 'belief-rsq', 'state-LL', 'memory-difference', 'memory-difference-with-esn']
+        fignames = ['Fig3D', 'Fig4B', 'Fig4C', 'Fig5E', 'Fig8H']
         fignames = [x + ('_top' if 'task1' in experiment_name else '_bottom') for x in fignames]
     else:
         attrnames = ['belief-rsq', 'state-LL']
         fignames = ['Fig7D', 'Fig7E']
     for figname, attr_name in zip(fignames, attrnames):
-        plotting.errors.by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname=figname)
+        plotting.errors.by_model(attr_name, experiment_name, Sessions, outdir, hidden_size, figname=figname, gain_to_plot=gain_to_plot)
 
     # Summarize number of trained RNNs with each number of fixed points
     nfps = [rnn['results']['memories']['n_fixed_points'] for rnn in Sessions['value-rnn-trained'] if rnn['hidden_size'] == hidden_size]
@@ -58,6 +58,9 @@ def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAUL
     plotting.memories.traj(Sessions, outdir, hidden_size, isi_max, 'odor', figname=figname, xtick=DEFAULT_ISI_MAX)
     figname = 'Fig5D_top' if 'task1' in experiment_name else 'Fig5D_bottom'
     plotting.memories.traj(Sessions, outdir, hidden_size, iti_min, 'reward', figname=figname, xtick=DEFAULT_ITI_MIN)
+
+    # figname = 'Fig5E_top' if 'task1' in experiment_name else 'Fig5E_bottom'
+    # plotting.memories.memory_difference(Sessions, hidden_size, outdir, figname=figname)
     
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
     if experiment_name == 'starkweather-task2':

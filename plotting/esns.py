@@ -6,7 +6,7 @@ esnColor = colors['value-esn']
 rnnColor = colors['value-rnn-trained']
 
 def plot_memories_scatter(results, outfile=None):
-    plt.figure(figsize=(2,2))
+    plt.figure(figsize=(2.05,2.05))
     for key, res in results.items():
         xs = res[:,1]
         ys = res[:,0]
