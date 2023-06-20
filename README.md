@@ -22,6 +22,8 @@ chmod +x bin/fit.sh
 
 Approximate run time: 36 hours.
 
+Alternatively, to use the fitted models analyzed in the paper, delete the empty `data/models` folder and then unzip `data/models.zip`.
+
 ## Analyze and make figures
 
 ```bash
