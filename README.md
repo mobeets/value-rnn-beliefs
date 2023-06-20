@@ -26,9 +26,18 @@ Alternatively, to use the fitted models analyzed in the paper, delete the empty 
 
 ## Analyze and make figures
 
+First, we must analyze all fitted models:
+
 ```bash
-chmod +x bin/run.sh
-./bin/run.sh
+chmod +x bin/analyze.sh
+./bin/analyze.sh
+```
+
+Now, we can make the figures:
+
+```bash
+chmod +x bin/plot.sh
+./bin/plot.sh
 ```
 
 The resulting figures will then be available at `data/figures/`.

@@ -221,7 +221,7 @@ if __name__ == '__main__':
         default=0.01,
         help='std dev of noise added to rnn responses')
     parser.add_argument('-i', '--indir', type=str,
-        default='valuernn/data',
+        default='data/models',
         help='where to find model files (.json and .pth)')
     parser.add_argument('-o', '--outdir', type=str,
         default='data/sessions',
