@@ -121,7 +121,7 @@ def single_rnn_plots_babayan(experiment_name, pomdp, valuernn, outdir):
     if valuernn is not None:
         plotting.misc.example_block_distances(valuernn, outdir, figname='SuppFig3B')
 
-def load_exemplar_models(experiment_name, indir, hidden_size, sigma, reproduce_paper):
+def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
     experiments = analyze.get_experiments(experiment_name)
     pomdp = session.analyze(analyze.get_models(experiment_name, 'pomdp')[0], experiments, doDecode=False)
     if 'babayan' in experiment_name:
@@ -133,15 +133,18 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma, reproduce_p
         valuernn = None
     else:
         weightsfile = None
-        if reproduce_paper:
-            if experiment_name == 'starkweather-task1':
-                weightsfile = os.path.join(indir, 'newloss_46377719_501_value_starkweather_task1_gru_h50_itimin10_1cues-v0.pth')
-            elif experiment_name == 'starkweather-task2':
-                weightsfile = os.path.join(indir, 'newloss_46377799_501_value_starkweather_task2_gru_h50_itimin10_1cues-v0.pth')
-            elif 'babayan' in experiment_name:
-                weightsfile = os.path.join(indir, 'newloss4_47062592_501_value_babayan_task_gru_h50_itimin10_1cues-v0.pth')
+        if experiment_name == 'starkweather-task1':
+            weightsfile = os.path.join(indir, 'newloss_46377719_501_value_starkweather_task1_gru_h50_itimin10_1cues-v0.pth')
+        elif experiment_name == 'starkweather-task2':
+            weightsfile = os.path.join(indir, 'newloss_46377799_501_value_starkweather_task2_gru_h50_itimin10_1cues-v0.pth')
+        elif 'babayan' in experiment_name:
+            weightsfile = os.path.join(indir, 'newloss4_47062592_501_value_babayan_task_gru_h50_itimin10_1cues-v0.pth')
         if weightsfile:
+            tmp_valuernns = valuernns
             valuernns = [rnn for rnn in valuernns if os.path.split(rnn['weightsfile'])[-1] == os.path.split(weightsfile)[-1]]
+            if len(valuernns) == 0:
+                print("WARNING: Could not find exemplar model for {}. Choosing a different one.".format(experiment_name))
+                valuernns = tmp_valuernns
         valuernn = session.analyze(valuernns[0], experiments, pomdp, sigma, doDecode=False)
     
     if 'starkweather' in args.experiment:
@@ -166,7 +169,7 @@ def main(args):
     plotting.errors.plot_loss(args.experiment, Sessions, args.outdir)
     summary_plots(args.experiment, Sessions, args.outdir, args.hidden_size)
 
-    pomdp, valuernn, untrainedrnn, valueesns = load_exemplar_models(args.experiment, args.indir, args.hidden_size, args.sigma, args.reproduce_paper)
+    pomdp, valuernn, untrainedrnn, valueesns = load_exemplar_models(args.experiment, args.indir, args.hidden_size, args.sigma)
     if args.experiment == 'babayan':
         single_rnn_plots_babayan(args.experiment, pomdp, valuernn, args.outdir)
     elif args.experiment == 'babayan-interpolate':
@@ -196,7 +199,5 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--outdir', type=str,
         default='data/figures',
         help='where to save figure files (.pdf)')
-    parser.add_argument('-p', '--reproduce_paper', action='store_true',
-        help='plot the same example models used in the paper')
     args = parser.parse_args()
     main(args)
