@@ -31,3 +31,4 @@ then
 	python analyze.py -e babayan -m value-rnn-untrained -i $DATADIR
 fi
 python plot.py -e babayan -i $DATADIR
+python plot.py -e babayan-interpolate -i $DATADIR

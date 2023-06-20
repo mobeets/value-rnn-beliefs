@@ -7,7 +7,7 @@ import analyze
 import session
 import plotting.errors, plotting.memories, plotting.esns, plotting.misc
 
-REPRODUCE_PAPER = False
+REPRODUCE_PAPER = True
 DEFAULT_ISI_MAX = 14 # Starkweather only
 DEFAULT_ITI_MIN = 10 # Starkweather only
 ESN_GAIN_TO_PLOT = 1.9 # Starkweather-task2 only
