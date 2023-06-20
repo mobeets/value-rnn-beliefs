@@ -7,7 +7,6 @@ import analyze
 import session
 import plotting.errors, plotting.memories, plotting.esns, plotting.misc
 
-REPRODUCE_PAPER = True
 DEFAULT_ISI_MAX = 14 # Starkweather only
 DEFAULT_ITI_MIN = 10 # Starkweather only
 ESN_GAIN_TO_PLOT = 1.9 # Starkweather-task2 only
@@ -122,7 +121,7 @@ def single_rnn_plots_babayan(experiment_name, pomdp, valuernn, outdir):
     if valuernn is not None:
         plotting.misc.example_block_distances(valuernn, outdir, figname='SuppFig3B')
 
-def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
+def load_exemplar_models(experiment_name, indir, hidden_size, sigma, reproduce_paper):
     experiments = analyze.get_experiments(experiment_name)
     pomdp = session.analyze(analyze.get_models(experiment_name, 'pomdp')[0], experiments, doDecode=False)
     if 'babayan' in experiment_name:
@@ -134,7 +133,7 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
         valuernn = None
     else:
         weightsfile = None
-        if REPRODUCE_PAPER:
+        if reproduce_paper:
             if experiment_name == 'starkweather-task1':
                 weightsfile = os.path.join(indir, 'newloss_46377719_501_value_starkweather_task1_gru_h50_itimin10_1cues-v0.pth')
             elif experiment_name == 'starkweather-task2':
@@ -167,7 +166,7 @@ def main(args):
     plotting.errors.plot_loss(args.experiment, Sessions, args.outdir)
     summary_plots(args.experiment, Sessions, args.outdir, args.hidden_size)
 
-    pomdp, valuernn, untrainedrnn, valueesns = load_exemplar_models(args.experiment, args.indir, args.hidden_size, args.sigma)
+    pomdp, valuernn, untrainedrnn, valueesns = load_exemplar_models(args.experiment, args.indir, args.hidden_size, args.sigma, args.reproduce_paper)
     if args.experiment == 'babayan':
         single_rnn_plots_babayan(args.experiment, pomdp, valuernn, args.outdir)
     elif args.experiment == 'babayan-interpolate':
@@ -197,5 +196,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--outdir', type=str,
         default='data/figures',
         help='where to save figure files (.pdf)')
+    parser.add_argument('-p', '--reproduce_paper', action='store_true',
+        help='plot the same example models used in the paper')
     args = parser.parse_args()
     main(args)
