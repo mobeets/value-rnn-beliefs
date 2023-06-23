@@ -62,9 +62,6 @@ def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAUL
     plotting.memories.traj(Sessions, outdir, hidden_size, isi_max, 'odor', figname=figname, xtick=DEFAULT_ISI_MAX)
     figname = 'Fig5D_top' if 'task1' in experiment_name else 'Fig5D_bottom'
     plotting.memories.traj(Sessions, outdir, hidden_size, iti_min, 'reward', figname=figname, xtick=DEFAULT_ITI_MIN)
-
-    # figname = 'Fig5E_top' if 'task1' in experiment_name else 'Fig5E_bottom'
-    # plotting.memories.memory_difference(Sessions, hidden_size, outdir, figname=figname)
     
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
     if experiment_name == 'starkweather-task2':
