@@ -94,7 +94,7 @@ def summary_by_gain(attr_name, Sessions, outdir, hidden_size, figname):
     # show average for trained RNNs'
     ysc = [valgetter(item) for item in Sessions.get('value-rnn-trained', []) if item['hidden_size'] == hidden_size]
     if len(ysc) > 0:
-        mu = np.nanmean(ysc)
+        mu = np.nanmedian(ysc)
         plt.plot(plt.xlim(), mu*np.ones(2), '--', linewidth=1.5, zorder=-1, color=rnnColor)
 
     if attr_name == 'odor-memory':

@@ -111,6 +111,7 @@ def rpes_babayan(models, outdir, figname):
 
 def rpes_babayan_interpolate(Sessions, outdir, figname):
     plt.figure(figsize=(4,2))
+    reward_sizes_per_block = []
     for c,ti in enumerate([1,2]):
         plt.subplot(1,2,c+1)
 

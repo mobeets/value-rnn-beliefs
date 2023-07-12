@@ -159,7 +159,11 @@ def by_model_size(attr_name, experiment_name, Sessions, outdir, figname):
             ignored = [(x,v) for x,v in zip(xs,vs) if np.abs(v) > thresh]
             if len(ignored) > 0:
                 print('Ignoring {} memory outliers where abs value is > {}: {}'.format(len(ignored), thresh, ignored))
-            xs, vs = zip(*[(x,v) for x,v in zip(xs,vs) if np.abs(v) < thresh])
+            try:
+                xs, vs = zip(*[(x,v) for x,v in zip(xs,vs) if np.abs(v) < thresh])
+            except ValueError:
+                xs = []
+                vs = []
             plt.plot(plt.xlim(), [0, 0], 'k-', linewidth=1, zorder=-1)
 
         if 'untrained' in key:

@@ -25,15 +25,15 @@ def get_activity(model, experiment, sigma=0):
     if sigma > 0:
         sds = np.vstack([trial.Z for trial in trials]).std(axis=0)
         for trial in trials:
-            trial.Z += sigma*sds*np.random.randn(*trial.Z.shape)
+            trial.Z = trial.Z.copy() + sigma*sds*np.random.randn(*trial.Z.shape)
     
     return trials
 
-def analyze(model, experiments, pomdp=None, sigma=0, verbose=True, doDecode=True):
+def analyze(model, experiments, pomdp=None, sigma=0, verbose=True, doDecode=True, noSigmaForPomdp=True):
     if verbose:
         print("Analyzing {}...".format(model['model_type']))
     session = dict((key, val) for key,val in model.items() if key != 'model')
-    session['sigma'] = sigma if model['model_type'] != 'pomdp' else 0.0
+    session['sigma'] = sigma if model['model_type'] != 'pomdp' else (0.0 if noSigmaForPomdp else sigma)
 
     # add model activity
     if verbose:
@@ -42,7 +42,6 @@ def analyze(model, experiments, pomdp=None, sigma=0, verbose=True, doDecode=True
     for name, experiment in experiments.items():
         Trials[name] = get_activity(model, experiment, session['sigma'])
     session['Trials'] = Trials
-    
     session['results'] = {}
 
     # fit value weights and get rpes
