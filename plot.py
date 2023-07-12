@@ -59,9 +59,9 @@ def summary_plots(experiment_name, Sessions, outdir, hidden_size, iti_min=DEFAUL
 
     # Figs 5C, 5D: plot distances from ITI following odor/reward, across models
     figname = 'Fig5C_top' if 'task1' in experiment_name else 'Fig5C_bottom'
-    plotting.memories.traj(Sessions, outdir, hidden_size, isi_max, 'odor', figname=figname, xtick=DEFAULT_ISI_MAX)
+    plotting.memories.traj(Sessions, outdir, hidden_size, isi_max, 'odor', figname=figname, experiment_name=experiment_name, xtick=DEFAULT_ISI_MAX)
     figname = 'Fig5D_top' if 'task1' in experiment_name else 'Fig5D_bottom'
-    plotting.memories.traj(Sessions, outdir, hidden_size, iti_min, 'reward', figname=figname, xtick=DEFAULT_ITI_MIN)
+    plotting.memories.traj(Sessions, outdir, hidden_size, iti_min, 'reward', figname=figname, experiment_name=experiment_name, xtick=DEFAULT_ITI_MIN)
     
     # Fig 6: plot RPE MSE, belief-rsq, and decoding-LL as a function of model size
     if experiment_name == 'starkweather-task2':

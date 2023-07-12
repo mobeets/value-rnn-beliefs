@@ -4,7 +4,7 @@ from plotting.base import plt, colors
 
 beliefColor = colors['pomdp']
 
-def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xtick, xmax=50):
+def traj(Sessions, outdir, hidden_size, xline, input_name, figname, xtick, experiment_name=None, xmax=50):
     # Figs 5C, 5D: plot distance from ITI following observations, across models
     rnns = [rnn for rnn in Sessions.get('value-rnn-trained', []) if rnn['hidden_size'] == hidden_size]
     if len(rnns) == 0:
