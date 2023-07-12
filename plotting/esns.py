@@ -72,8 +72,8 @@ def summary_by_gain(attr_name, Sessions, outdir, hidden_size, figname):
         print("ERROR: Could not find any {} models in processed sessions data.".format(key))
         return
     if attr_name in ['odor-memory', 'reward-memory']:
-        ymax = 200
-        yover = 210
+        ymax = 300
+        yover = 310
     xs = np.array([item['gain'] for item in Sessions[key]])
     ys = np.array([valgetter(item) for item in Sessions[key]])
 
@@ -88,21 +88,19 @@ def summary_by_gain(attr_name, Sessions, outdir, hidden_size, figname):
         plt.plot(xs[~ix], yover*np.ones((~ix).sum()), '.', color='#ED9F9F')        
     else:
         plt.plot(xs, ys, '.', color=esnColor)
-    
-    # plt.plot(xsa, mus, '.', markersize=8, color=esnColor, zorder=0)
 
-    # show average for trained RNNs'
+    # show average for trained RNNs
     ysc = [valgetter(item) for item in Sessions.get('value-rnn-trained', []) if item['hidden_size'] == hidden_size]
     if len(ysc) > 0:
         mu = np.nanmedian(ysc)
         plt.plot(plt.xlim(), mu*np.ones(2), '--', linewidth=1.5, zorder=-1, color=rnnColor)
 
     if attr_name == 'odor-memory':
-        plt.yticks(ticks=[0,100,200])
+        plt.yticks(ticks=[0,100,200,300])
         plt.ylim([0, yover+10])
         plt.ylabel('Odor memory')
     elif attr_name == 'reward-memory':
-        plt.yticks(ticks=[0,100,200])
+        plt.yticks(ticks=[0,100,200,300])
         plt.ylim([0, yover+10])
         plt.ylabel('Reward memory')
     elif attr_name == 'belief-rsq':
@@ -112,7 +110,7 @@ def summary_by_gain(attr_name, Sessions, outdir, hidden_size, figname):
     elif attr_name == 'rpe-mse':
         plt.ylabel('RPE MSE')
         plt.yticks([0, 0.01])
-        plt.ylim([-0.002, 0.014])
+        plt.ylim([-0.002, 0.016])
     elif attr_name == 'state-LL':
         plt.ylabel('Log-likelihood')
         plt.yticks([-1, 0])

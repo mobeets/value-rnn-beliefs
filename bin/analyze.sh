@@ -17,3 +17,5 @@ python analyze.py -e starkweather-task2 -m value-esn -i $DATADIR --hidden_size $
 python analyze.py -e babayan -m pomdp -i $DATADIR
 python analyze.py -e babayan -m value-rnn-trained -i $DATADIR
 python analyze.py -e babayan -m value-rnn-untrained -i $DATADIR
+python analyze.py -e babayan-interpolate -m pomdp -i $DATADIR
+python analyze.py -e babayan-interpolate -m value-rnn-trained -i $DATADIR

@@ -185,7 +185,7 @@ if __name__ == '__main__':
         default=50,
         help='hidden size to use for summarizing rnn results')
     parser.add_argument('--sigma', type=float,
-        default=0.01,
+        default=0.05,
         help='std dev of noise added to rnn responses')
     parser.add_argument('-s', '--sessiondir', type=str,
         default='data/sessions',

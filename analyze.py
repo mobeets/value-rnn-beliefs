@@ -218,7 +218,7 @@ if __name__ == '__main__':
         default=None,
         help='hidden size to analyze for rnns (None analyzes all rnns)')
     parser.add_argument('-s', '--sigma', type=float,
-        default=0.01,
+        default=0.05,
         help='std dev of noise added to rnn responses')
     parser.add_argument('-i', '--indir', type=str,
         default='data/models',

@@ -115,9 +115,8 @@ def rpes_babayan_interpolate(Sessions, outdir, figname):
     for c,ti in enumerate([1,2]):
         plt.subplot(1,2,c+1)
 
-        for model_type, models in Sessions.items():
-            if model_type == 'value-rnn-untrained':
-                continue
+        for model_type in ['pomdp', 'value-rnn-trained']:
+            models = Sessions[model_type]
             color = colors[model_type]
             alpha = 0.2 if 'rnn' in model_type else 1
             yss = []
@@ -131,7 +130,8 @@ def rpes_babayan_interpolate(Sessions, outdir, figname):
             ses = np.std(yss, axis=0)/np.sqrt(yss.shape[0])
             lbs = mus-ses; ubs = mus+ses
             plt.plot(reward_sizes_per_block, mus, '.', markersize=8,
-                    color=color, label=model_type, zorder=0)
+                    color=color, label=model_type,
+                    zorder=1 if 'rnn' in model_type else 0)
             for r,lb,ub in zip(reward_sizes_per_block,lbs,ubs):
                 plt.plot(r*np.ones(2), [lb,ub], '-', color=color, zorder=-1)
 

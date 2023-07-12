@@ -51,7 +51,7 @@ def get_plotting_info(experiment_name, attr_name, byModelSize=False, hidden_size
         valgetter = lambda item: item['results']['value']['mse']['rpe_mse']
         ylbl = 'RPE MSE'
         if not byModelSize:
-            yl = [-0.0006, 0.01]
+            yl = [-0.0006, 0.016]
             yticks = [0, 0.01]
         else:
             yl = []
@@ -68,9 +68,9 @@ def get_plotting_info(experiment_name, attr_name, byModelSize=False, hidden_size
         valgetter = lambda item: item['results']['state_decoding']['LL']
         ylbl = 'Log-likelihood'
         if 'starkweather' in experiment_name:
-            yl = [-0.5, 0.03] if not byModelSize else [-2, 0.03]
+            yl = [-0.58, 0.03] if not byModelSize else [-2, 0.03]
         else:
-            yl = [-0.8, 0.05]
+            yl = [-1.2, 0.06]
     elif 'memory-difference' in attr_name:
         o_ngetter = lambda item: len(item['results']['memories']['odor_memories'])
         o_valgetter = lambda item: item['results']['memories']['odor_memories'][0]['duration'] if o_ngetter(item) == 1 else np.nan
