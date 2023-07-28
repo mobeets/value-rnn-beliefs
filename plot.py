@@ -142,7 +142,7 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
             if len(valuernns) == 0:
                 print("WARNING: Could not find exemplar model for {}. Choosing a different one.".format(experiment_name))
                 valuernns = tmp_valuernns
-        valuernn = session.analyze(valuernns[0], experiments, pomdp, sigma, doDecode=False)
+        valuernn = session.analyze(valuernns[0], experiments, pomdp, sigma, doDecode=False, findPretendOmissions=True)
     
     if 'starkweather' in args.experiment:
         untrainedrnns = analyze.get_models(experiment_name, 'value-rnn-untrained', indir, hidden_size)
@@ -150,13 +150,13 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
             print("WARNING: Could not find any value-rnn-untrained model files (.json).")
             untrainedrnn = None
         else:
-            untrainedrnn = session.analyze(untrainedrnns[0], experiments, pomdp, sigma, doDecode=False)
+            untrainedrnn = session.analyze(untrainedrnns[0], experiments, pomdp, sigma, doDecode=False, findPretendOmissions=True)
     else:
         untrainedrnn = None
 
     if 'task2' in experiment_name:
         valueesns = analyze.get_models(experiment_name, 'value-esn', indir, hidden_size, esn_gains=[0.9, 1.9])
-        valueesns = [session.analyze(x, experiments, pomdp, sigma, doDecode=False) for x in valueesns]
+        valueesns = [session.analyze(x, experiments, pomdp, sigma, doDecode=False, findPretendOmissions=True) for x in valueesns]
     else:
         valueesns = None
     return pomdp, valuernn, untrainedrnn, valueesns

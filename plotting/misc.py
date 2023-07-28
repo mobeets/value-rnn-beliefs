@@ -203,7 +203,6 @@ def example_trajectories(experiment_name, model, outdir, figname, showPretendOmi
     nullResp = 'k'
     nullRespOmission = 'c'
     trialIndsToShow = [0] if 'starkweather' in experiment_name else [2,7]
-    # Trajs = [traj['trajectory'] for traj in model['results']['memories']['pretend_omission_trials']]
     Trajs = model['results']['memories']['pretend_omission_trials']
 
     pca = PCA(n_components=Z.shape[1])
@@ -285,7 +284,7 @@ def example_block_distances(model, outdir, figname):
     fps = model['results']['memories']['fixed_points']
     if len(fps) != 1:
         print("ERROR: Did not find one fixed point.")
-    trajs = [traj['trajectory'] for traj in model['results']['memories']['pretend_omission_trials']]
+    trajs = model['results']['memories']['pretend_omission_trials']
     for trial, traj in zip(trials, trajs):
         if trial.rel_trial_index == 0:
             continue

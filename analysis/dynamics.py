@@ -115,7 +115,7 @@ def add_memory_trajectories_pomdp(pomdp, trials):
 
     return {'odor_memories': ds_odor, 'rew_memories': ds_rew}
 
-def analyze(model, Trials):
+def analyze(model, Trials, findPretendOmissions=False):
     trials = Trials['test'] # we do not need training trials for these analyses
 
     if model['model_type'] == 'pomdp':
@@ -135,17 +135,11 @@ def analyze(model, Trials):
     res = {'fixed_points': fixed_points, 'n_fixed_points': n_fixed_points, 'odor_memories': odor_memories, 'rew_memories': rew_memories}
     
     # find trajectories on omission trials
-    starting_points = sample_starting_points(trials[:10], 10)
-    trialIndsToKeep = [0] if 'starkweather' in model['experiment_name'] else [2,7]
-    omission_trials = []
-    for t, starting_point in enumerate(starting_points['ISI']):
-        # n.b. these trials take up lots of space, so only save the ones we will eventually plot
-        if t in trialIndsToKeep:
+    if findPretendOmissions:
+        starting_points = sample_starting_points(trials[:10], 10)
+        omission_trials = []
+        for starting_point in starting_points['ISI']:
             ctrial = add_memory_trajectory_and_duration(model['model'], starting_point, 'null', minreps=50)
-            ctraj = ctrial['trajectory']
-        else:
-            ctraj = None
-        omission_trials.append(ctraj)
-    
-    res['pretend_omission_trials'] = omission_trials
+            omission_trials.append(ctrial['trajectory'])
+        res['pretend_omission_trials'] = omission_trials
     return res
