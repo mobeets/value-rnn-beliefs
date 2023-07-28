@@ -84,7 +84,7 @@ def score_state_LL(trials, state_weights, model_type, pca=None):
             X = pca.transform(X)
         return decode_X_from_y_eval(X, S, state_weights)
 
-def analyze(model, Trials, usePCs=True):
+def analyze(model, Trials, usePCs=True, saveSpace=True):
     if usePCs and model['model_type'] != 'pomdp':
         Z = np.vstack([trial.Z for trial in Trials['train']])
         pca = PCA(n_components=Z.shape[1])
@@ -97,4 +97,6 @@ def analyze(model, Trials, usePCs=True):
         state_weights = None
     results = score_state_LL(Trials['test'], state_weights, model['model_type'], pca=pca)
     results['state_weights'] = state_weights
+    if saveSpace:
+        results = {'LL': results['LL']}
     return results

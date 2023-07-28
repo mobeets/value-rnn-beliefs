@@ -29,7 +29,7 @@ def get_activity(model, experiment, sigma=0):
     
     return trials
 
-def analyze(model, experiments, pomdp=None, sigma=0, verbose=True, doDecode=True, noSigmaForPomdp=True, findPretendOmissions=False, keepMemoryTrajs=False):
+def analyze(model, experiments, pomdp=None, sigma=0, verbose=True, doDecode=True, noSigmaForPomdp=True, findPretendOmissions=False, keepMemoryTrajs=False, saveSpace=True):
     if verbose:
         print("Analyzing {}...".format(model['model_type']))
     session = dict((key, val) for key,val in model.items() if key != 'model')
@@ -62,7 +62,7 @@ def analyze(model, experiments, pomdp=None, sigma=0, verbose=True, doDecode=True
     if verbose:
         print("    Performing state decoding.")
     if doDecode:
-        session['results']['state_decoding'] = analysis.decoding.analyze(model, Trials)
+        session['results']['state_decoding'] = analysis.decoding.analyze(model, Trials, saveSpace=saveSpace)
 
     # characterize dynamics
     if verbose:
