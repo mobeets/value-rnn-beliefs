@@ -19,7 +19,6 @@ ITI_MIN = 10
 GAMMA = 0.93
 P_OMISSION = 0.1 # starkweather only
 REWARD_TIME = 10 # babayan only
-ESN_GAINS = np.round(np.tile(np.arange(0.1, 2.8, 0.2), 12), 2)
 MIN_DATETIME = None
 MAX_DATETIME = None
 
@@ -123,7 +122,7 @@ def make_rnn_model(hidden_size):
         bias=True, learn_weights=True)
 
 def get_weightsfile(jsonfile, rnn, model_type):
-    if 'untrained' in model_type:
+    if 'untrained' in model_type or model_type == 'value-esn':
         if 'weightsfile_initial' not in rnn:
             return
         else:
@@ -137,9 +136,16 @@ def get_weightsfile(jsonfile, rnn, model_type):
     return os.path.join(os.path.split(jsonfile)[0], os.path.split(weightsfile)[1])
 
 def load_model(jsonfile, model_type, hidden_size):
-    assert model_type in ['value-rnn-trained', 'value-rnn-untrained']
+    assert model_type in ['value-rnn-trained', 'value-rnn-untrained', 'value-esn']
     model = json.load(open(jsonfile))
     if hidden_size is not None and model['hidden_size'] != hidden_size:
+        return None
+    gain = model.get('initialization_gain', 0)
+    if model_type == 'value-esn':
+        if gain == 0:
+            return None
+        model['gain'] = model['initialization_gain']
+    elif gain != 0:
         return None
     rnn = make_rnn_model(model['hidden_size'])
     weightsfile = get_weightsfile(jsonfile, model, model_type)
@@ -154,25 +160,14 @@ def load_model(jsonfile, model_type, hidden_size):
     model['jsonfile'] = jsonfile
     return model
 
-def get_models(experiment_name, model_type, indir=None, hidden_size=None, esn_gains=ESN_GAINS):
+def get_models(experiment_name, model_type, indir=None, hidden_size=None):
     models = []
-    if model_type in ['value-rnn-trained', 'value-rnn-untrained']:
+    if model_type in ['value-rnn-trained', 'value-rnn-untrained', 'value-esn']:
         jsonfiles = get_modelfiles(experiment_name, indir)
         for jsonfile in jsonfiles:
             model = load_model(jsonfile, model_type, hidden_size)
             if rnn_model_is_valid(experiment_name, model):
                 models.append(model)
-    elif model_type == 'value-esn':
-        if hidden_size is None:
-            raise Exception("You must provide a hidden_size to analyze for the value-esn")
-        for gain in esn_gains:
-            rnn = make_rnn_model(hidden_size)
-            rnn.initialize(gain)
-            model = {}
-            model['hidden_size'] = hidden_size
-            model['model'] = rnn
-            model['gain'] = gain
-            models.append(model)
     elif model_type == 'pomdp':
         models.append({})
     else:
