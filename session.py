@@ -29,7 +29,7 @@ def get_activity(model, experiment, sigma=0):
     
     return trials
 
-def analyze(model, experiments, pomdp=None, sigma=0, verbose=True, doDecode=True, noSigmaForPomdp=True, findPretendOmissions=False):
+def analyze(model, experiments, pomdp=None, sigma=0, verbose=True, doDecode=True, noSigmaForPomdp=True, findPretendOmissions=False, keepMemoryTrajs=False):
     if verbose:
         print("Analyzing {}...".format(model['model_type']))
     session = dict((key, val) for key,val in model.items() if key != 'model')
@@ -67,6 +67,6 @@ def analyze(model, experiments, pomdp=None, sigma=0, verbose=True, doDecode=True
     # characterize dynamics
     if verbose:
         print("    Analyzing dynamics.")
-    session['results']['memories'] = analysis.dynamics.analyze(model, Trials, findPretendOmissions=findPretendOmissions)
+    session['results']['memories'] = analysis.dynamics.analyze(model, Trials, findPretendOmissions=findPretendOmissions, keepMemoryTrajs=keepMemoryTrajs)
 
     return session

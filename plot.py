@@ -155,8 +155,10 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
         untrainedrnn = None
 
     if 'task2' in experiment_name:
-        valueesns = analyze.get_models(experiment_name, 'value-esn', indir, hidden_size, esn_gains=[0.9, 1.9])
-        valueesns = [session.analyze(x, experiments, pomdp, sigma, doDecode=False, findPretendOmissions=True) for x in valueesns]
+        esn_gains = [0.9, 1.9]
+        all_valueesns = analyze.get_models(experiment_name, 'value-esn', indir, hidden_size)
+        valueesns = [[model for model in all_valueesns if model['gain'] == g][0] for g in esn_gains]
+        valueesns = [session.analyze(x, experiments, pomdp, sigma, doDecode=False, findPretendOmissions=True, keepMemoryTrajs=True) for x in valueesns]
     else:
         valueesns = None
     return pomdp, valuernn, untrainedrnn, valueesns

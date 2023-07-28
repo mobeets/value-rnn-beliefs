@@ -115,7 +115,7 @@ def add_memory_trajectories_pomdp(pomdp, trials):
 
     return {'odor_memories': ds_odor, 'rew_memories': ds_rew}
 
-def analyze(model, Trials, findPretendOmissions=False):
+def analyze(model, Trials, findPretendOmissions=False, keepMemoryTrajs=False):
     trials = Trials['test'] # we do not need training trials for these analyses
 
     if model['model_type'] == 'pomdp':
@@ -129,9 +129,18 @@ def analyze(model, Trials, findPretendOmissions=False):
 
     odor_memories = []
     rew_memories = []
-    for fixed_point in fixed_points:
-        odor_memories.append(add_memory_trajectory_and_duration(model['model'], fixed_point, 'odor'))
-        rew_memories.append(add_memory_trajectory_and_duration(model['model'], fixed_point, 'reward'))
+    for i, fixed_point in enumerate(fixed_points):
+        odor_mem = add_memory_trajectory_and_duration(model['model'], fixed_point, 'odor')
+        rew_mem = add_memory_trajectory_and_duration(model['model'], fixed_point, 'reward')
+        if not keepMemoryTrajs:
+            # to save space
+            odor_mem.pop('trajectory')
+            rew_mem.pop('trajectory')
+            if i > 0:
+                odor_mem.pop('distances')
+                rew_mem.pop('distances')
+        odor_memories.append(odor_mem)
+        rew_memories.append(rew_mem)
     res = {'fixed_points': fixed_points, 'n_fixed_points': n_fixed_points, 'odor_memories': odor_memories, 'rew_memories': rew_memories}
     
     # find trajectories on omission trials
