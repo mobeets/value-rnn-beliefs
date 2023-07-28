@@ -202,13 +202,9 @@ def example_trajectories(experiment_name, model, outdir, figname, showPretendOmi
         rewRespBig = colors['rewRespBig']
     nullResp = 'k'
     nullRespOmission = 'c'
-    trialIndsToShow = [2] if 'starkweather' in experiment_name else [1,6]
-    if 'starkweather' in experiment_name:
-        trialIndsToShow = [i for i in range(len(trials)-1) if trials[i+1].iti > 20][:1]
-    else:
-        trialIndsToShow = [2,7]
-    
-    Trajs = [traj['trajectory'] for traj in model['results']['memories']['pretend_omission_trials']]
+    trialIndsToShow = [0] if 'starkweather' in experiment_name else [2,7]
+    # Trajs = [traj['trajectory'] for traj in model['results']['memories']['pretend_omission_trials']]
+    Trajs = model['results']['memories']['pretend_omission_trials']
 
     pca = PCA(n_components=Z.shape[1])
     pca.fit(Z)

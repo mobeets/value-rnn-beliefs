@@ -136,8 +136,16 @@ def analyze(model, Trials):
     
     # find trajectories on omission trials
     starting_points = sample_starting_points(trials[:10], 10)
+    trialIndsToKeep = [0] if 'starkweather' in model['experiment_name'] else [2,7]
     omission_trials = []
-    for starting_point in starting_points['ISI']:
-        omission_trials.append(add_memory_trajectory_and_duration(model['model'], starting_point, 'null', minreps=50))
+    for t, starting_point in enumerate(starting_points['ISI']):
+        # n.b. these trials take up lots of space, so only save the ones we will eventually plot
+        if t in trialIndsToKeep:
+            ctrial = add_memory_trajectory_and_duration(model['model'], starting_point, 'null', minreps=50)
+            ctraj = ctrial['trajectory']
+        else:
+            ctraj = None
+        omission_trials.append(ctraj)
+    
     res['pretend_omission_trials'] = omission_trials
     return res
