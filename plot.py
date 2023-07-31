@@ -165,7 +165,6 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
 
 def main(args):
     Sessions = load_sessions(args.experiment, args.sessiondir)
-    plotting.errors.plot_loss(args.experiment, Sessions, args.outdir)
     summary_plots(args.experiment, Sessions, args.outdir, args.hidden_size)
 
     pomdp, valuernn, untrainedrnn, valueesns = load_exemplar_models(args.experiment, args.indir, args.hidden_size, args.sigma)

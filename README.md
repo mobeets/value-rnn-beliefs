@@ -13,33 +13,34 @@ conda create --name valuernn python=3.9 pytorch matplotlib numpy scipy scikit-le
 conda activate valuernn
 ```
 
-## Fitting models
+## Train models
 
+__Option 1.__ To use the models from the paper, unzip `data/models.zip` to the folder `data/models`.
+
+__Option 2.__ To fit your own models (approximate run time: 48 hours), run:
 ```bash
 chmod +x bin/fit.sh
 ./bin/fit.sh
 ```
 
-Approximate run time: 36 hours.
+## Analyze models
 
-Alternatively, to use the fitted models analyzed in the paper, delete the empty `data/models` folder and then unzip `data/models.zip`.
+__Option 1.__ To use the analyses from the paper, unzip `data/sessions.zip` to the folder `data/sessions`.
 
-## Analyze and make figures
-
-First, we must analyze all fitted models:
-
+__Option 2.__ To analyze your own models, run:
 ```bash
 chmod +x bin/analyze.sh
 ./bin/analyze.sh
 ```
 
-Now, we can make the figures:
+## Make figures
 
+To make the figures, run:
 ```bash
 chmod +x bin/plot.sh
 ./bin/plot.sh
 ```
 
-The resulting figures will then be available at `data/figures/`.
+The resulting figures will be in `data/figures/`.
 
 (Note: If you encounter an error on Mac regarding `libomp.dylib`, try `conda install nomkl`.)

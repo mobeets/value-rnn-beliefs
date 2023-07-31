@@ -2,47 +2,6 @@ import os.path
 import numpy as np
 from plotting.base import plt, colors
 
-def plot_loss(experiment_name, Sessions, outdir):
-    hs = [2,5,10,20,50,100]
-    for key, items in Sessions.items():
-        if key != 'value-rnn-trained':
-            continue
-        Ls = {}
-        for h in hs:
-            c = 0
-            Ls[h] = []
-            for i, rnn in enumerate(items):
-                if rnn['hidden_size'] != h:
-                    continue
-                c += 1
-                plt.subplot(3,4,c)
-                plt.plot(rnn['scores'], zorder=1)
-                plt.xlim([0,250])
-                plt.plot(plt.xlim(), [0,0], 'k-', zorder=-1, alpha=0.3)
-                if 'starkweather' in experiment_name:
-                    plt.plot(plt.xlim(), [0.05,0.05], 'k-', zorder=-1, alpha=0.3)
-                plt.plot(plt.xlim(), min(rnn['scores'])*np.ones(2), 'r-', zorder=0, alpha=0.5)
-                if 'starkweather' in experiment_name:
-                   plt.ylim([-0.002, 0.05])
-                Ls[h].append(min(rnn['scores']))
-                plt.axis('off')
-            plt.tight_layout()
-            if len(Ls[h]) > 0:
-                plt.savefig(os.path.join(outdir, '{}_loss_{}.pdf'.format(experiment_name, h)))
-            plt.close()
-
-            for h, vs in Ls.items():
-                if len(vs) == 0:
-                    continue
-                plt.plot(h*np.ones(len(vs)), vs, 'k.', alpha=0.5)
-                plt.plot(h, np.median(vs), 'ko', zorder=-1)
-            plt.xlabel('hidden size')
-            plt.ylabel('best loss')
-            plt.tight_layout()
-            plt.savefig(os.path.join(outdir, '{}_loss_all.pdf'.format(experiment_name)))
-            plt.close()
-        return
-
 def get_plotting_info(experiment_name, attr_name, byModelSize=False, hidden_size=None):
     model_names = ['pomdp', 'value-rnn-untrained', 'value-rnn-trained']
     labels = ['Beliefs', 'Untrained RNN', 'Value RNN']

@@ -3,9 +3,9 @@
 logs/*
 data/models/*.pth
 data/models/*.json
-data/figures/*.pdf
+# data/figures/*.pdf
+data/figures_loss
 data/sessions/*.pickle
-data/memories/*
 *.pyc
 
 ## Core latex/pdflatex auxiliary files:
