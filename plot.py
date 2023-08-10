@@ -144,7 +144,7 @@ def load_exemplar_models(experiment_name, indir, hidden_size, sigma):
                 valuernns = tmp_valuernns
         valuernn = session.analyze(valuernns[0], experiments, pomdp, sigma, doDecode=False, findPretendOmissions=True)
     
-    if 'starkweather' in args.experiment:
+    if 'starkweather' in experiment_name:
         untrainedrnns = analyze.get_models(experiment_name, 'value-rnn-untrained', indir, hidden_size)
         if len(untrainedrnns) == 0:
             print("WARNING: Could not find any value-rnn-untrained model files (.json).")
