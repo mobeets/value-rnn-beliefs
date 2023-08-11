@@ -301,15 +301,17 @@ def example_block_distances(model, outdir, figname):
     plt.savefig(os.path.join(outdir, figname + '.pdf'))
     plt.close()
 
-def heatmaps(model, outdir, figname):
+def heatmaps(model, outdir, figname, tPre=2, tPost=10):
+    """
+    tPre (int) is number of time steps shown before odor
+    tPost (int) is number of time steps shown after reward
+    """
     trials = model['Trials']['test']
     name = model['model_type']
 
     sortThisData = True
     iti = 11 # iti duration
     isi = 14 # reward time
-    tPre = 2 # number of time steps shown before odor
-    tPost = 10 # number of time steps shown after reward
 
     trialinds = [i for i,x in enumerate(trials) if x.iti==iti and x.isi==isi and x.y.sum() > 0]
     X_hats = []
@@ -347,5 +349,6 @@ def heatmaps(model, outdir, figname):
     plt.tight_layout()
     cbar = plt.colorbar()
     cbar.ax.tick_params(labelsize=10)
-    plt.savefig(os.path.join(outdir, figname + '.pdf'))
-    plt.close()
+    if outdir:
+        plt.savefig(os.path.join(outdir, figname + '.pdf'))
+        plt.close()

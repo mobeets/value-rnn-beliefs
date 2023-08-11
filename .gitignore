@@ -6,6 +6,7 @@ data/models/*.json
 # data/figures/*.pdf
 data/figures_loss
 data/sessions/*.pickle
+data/sessions/*.npy
 *.pyc
 
 ## Core latex/pdflatex auxiliary files:
